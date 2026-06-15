@@ -25,7 +25,8 @@ docs/
  ├─ 06-pvp-social.md        PvP / สังคม / สงครามสำนัก
  ├─ 07-world-lore.md        โลก / เนื้อเรื่อง 9 องก์
  ├─ 08-monsters-bosses.md   มอนสเตอร์ / บอส / PvE
- └─ 09-systems-misc.md      ระบบเสริม + UX + สรุป core loop
+ ├─ 09-systems-misc.md      ระบบเสริม + UX + สรุป core loop
+ └─ 10-data-schemas.md      Data schema + อภิธานศัพท์ (dev hand-off)
 ```
 
 ## สถานะ
