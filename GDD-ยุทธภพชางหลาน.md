@@ -20,6 +20,7 @@
 | 08 | [docs/08-monsters-bosses.md](docs/08-monsters-bosses.md) | ระดับศัตรู, stat block, บอสหลายเฟส, ดันเจี้ยน, loot/pity |
 | 09 | [docs/09-systems-misc.md](docs/09-systems-misc.md) | นั่งสมาธิ, พาหนะ, อาจารย์-ศิษย์, อีเวนต์/ซีซัน, UX text-based, กันโกง |
 | 10 | [docs/10-data-schemas.md](docs/10-data-schemas.md) | Data schema (วิชา/ศัตรู/บอส/ไอเทม/เซฟ), stat pipeline, อภิธานศัพท์, open questions |
+| 11 | [docs/11-combat-grid-atb.md](docs/11-combat-grid-atb.md) | **โหมดต่อสู้ทางเลือก:** กริด (สี่เหลี่ยม/หกเหลี่ยม) + Real-time ATB + Radial AoE + floating damage |
 
 ---
 

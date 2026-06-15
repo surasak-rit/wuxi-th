@@ -26,7 +26,8 @@ docs/
  ├─ 07-world-lore.md        โลก / เนื้อเรื่อง 9 องก์
  ├─ 08-monsters-bosses.md   มอนสเตอร์ / บอส / PvE
  ├─ 09-systems-misc.md      ระบบเสริม + UX + สรุป core loop
- └─ 10-data-schemas.md      Data schema + อภิธานศัพท์ (dev hand-off)
+ ├─ 10-data-schemas.md      Data schema + อภิธานศัพท์ (dev hand-off)
+ └─ 11-combat-grid-atb.md   โหมดต่อสู้ทางเลือก: กริด + Real-time ATB + Radial AoE
 ```
 
 ## สถานะ
