@@ -1,7 +1,24 @@
 # เอกสารออกแบบเกม (GDD) — *ตำนานยุทธภพชางหลาน* (Canglan Jianghu Online)
 
 > เกม text-based MMORPG กำลังภายในจีน ต้นฉบับ — แพลตฟอร์มเว็บ
-> เวอร์ชันเอกสาร: 0.1 (Draft for Dev Hand-off)
+> เวอร์ชันเอกสาร: 0.2 (Draft for Dev Hand-off)
+
+---
+
+## สารบัญเอกสาร (Document Index)
+ไฟล์นี้คือ **ภาพรวมระดับสูง** — รายละเอียดเชิงลึกพร้อมสูตร/ตารางอยู่ในโฟลเดอร์ `docs/`:
+
+| # | เอกสาร | เนื้อหา |
+|---|---|---|
+| 01 | [docs/01-combat-system.md](docs/01-combat-system.md) | ระบบต่อสู้เชิงลึก: ลำดับรอบ, สูตรครบ, สถานะ, แผนการรบ (AI), การฟื้นฟู |
+| 02 | [docs/02-skills-cultivation.md](docs/02-skills-cultivation.md) | ระบบวิชา/ฝึกฝน, ดาว, ความเข้าใจ, **สายวิชาครบ 5 สำนัก**, 内功 |
+| 03 | [docs/03-progression-fame.md](docs/03-progression-fame.md) | Combat EXP, เพดานชื่อเสียง, ตารางต้นทุน, PI, เป้า pacing/retention |
+| 04 | [docs/04-sects.md](docs/04-sects.md) | 5 สำนักเต็ม: อัตลักษณ์, ค่าเริ่มต้น, บทบาท, counter matrix |
+| 05 | [docs/05-items-economy.md](docs/05-items-economy.md) | ไอเทม, คุณภาพ, gear_score, คราฟต์/ตีบวก, faucet/sink เงินเฟ้อ |
+| 06 | [docs/06-pvp-social.md](docs/06-pvp-social.md) | ดวล, PK/karma, ปาร์ตี้, สำนักผู้เล่น, สงครามชิงเมือง, อันดับ, สังคม |
+| 07 | [docs/07-world-lore.md](docs/07-world-lore.md) | ภูมิภาค, ไทม์ไลน์, เนื้อเรื่อง 9 องก์, NPC, คัมภีร์, ตอนจบ, เควส |
+| 08 | [docs/08-monsters-bosses.md](docs/08-monsters-bosses.md) | ระดับศัตรู, stat block, บอสหลายเฟส, ดันเจี้ยน, loot/pity |
+| 09 | [docs/09-systems-misc.md](docs/09-systems-misc.md) | นั่งสมาธิ, พาหนะ, อาจารย์-ศิษย์, อีเวนต์/ซีซัน, UX text-based, กันโกง |
 
 ---
 
