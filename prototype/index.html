@@ -498,28 +498,28 @@ let bgCanvas;
 function buildBackground(){
   bgCanvas=document.createElement("canvas"); bgCanvas.width=CW; bgCanvas.height=CH;
   const b=bgCanvas.getContext("2d");
-  // ท้องฟ้าหมึก
+  // ท้องฟ้าอุ่น (สนามรบกลางวันแบบทะเลทราย/ดินแดง สไตล์ MMO จีนคลาสสิก)
   let g=b.createLinearGradient(0,0,0,CH);
-  g.addColorStop(0,"#1a120a"); g.addColorStop(.5,"#120b05"); g.addColorStop(1,"#080502");
+  g.addColorStop(0,"#d9bd8a"); g.addColorStop(.38,"#b1854f");
+  g.addColorStop(.7,"#6e4d30"); g.addColorStop(1,"#3a2516");
   b.fillStyle=g; b.fillRect(0,0,CW,CH);
-  // ดวงจันทร์
-  b.fillStyle="rgba(232,220,180,0.10)";
-  b.beginPath(); b.arc(CW*0.78,70,46,0,7); b.fill();
-  b.fillStyle="rgba(232,220,180,0.05)";
-  b.beginPath(); b.arc(CW*0.78,70,70,0,7); b.fill();
-  // ภูเขาหมึก (เลเยอร์)
+  // ดวงตะวันมัวในหมอกฝุ่น
+  let sun=b.createRadialGradient(CW*0.76,66,8,CW*0.76,66,120);
+  sun.addColorStop(0,"rgba(255,243,208,0.55)"); sun.addColorStop(1,"rgba(255,243,208,0)");
+  b.fillStyle=sun; b.beginPath(); b.arc(CW*0.76,66,120,0,7); b.fill();
+  // ภูเขาดินไกล (เลเยอร์อุ่น)
   function mountain(yBase,h,col){
     b.fillStyle=col; b.beginPath(); b.moveTo(0,yBase);
     let x=0; while(x<CW){ const peak=yBase-h*(0.5+Math.random()*0.6);
       b.lineTo(x+30,peak); b.lineTo(x+70,yBase-h*0.2); x+=80; }
     b.lineTo(CW,yBase); b.closePath(); b.fill();
   }
-  mountain(150,90,"rgba(70,90,80,0.14)");
-  mountain(180,70,"rgba(50,70,62,0.18)");
-  mountain(210,60,"rgba(30,45,40,0.22)");
-  // เมฆริ้ว
-  b.fillStyle="rgba(200,210,200,0.04)";
-  for(let i=0;i<5;i++){ const y=40+i*22; b.fillRect(0,y,CW,5); }
+  mountain(150,92,"rgba(150,112,72,0.30)");
+  mountain(182,72,"rgba(120,86,54,0.40)");
+  mountain(212,60,"rgba(92,64,40,0.55)");
+  // ม่านฝุ่นริ้ว
+  b.fillStyle="rgba(230,205,160,0.05)";
+  for(let i=0;i<5;i++){ const y=40+i*24; b.fillRect(0,y,CW,6); }
 }
 
 // ====================== วาดพื้นไอโซเมตริก (ลานหินหยก) ======================
@@ -530,12 +530,12 @@ function drawFloor(){
     const shade=((i+j)%2===0);
     ctx.beginPath();
     ctx.moveTo(t.x,t.y); ctx.lineTo(r.x,r.y); ctx.lineTo(bo.x,bo.y); ctx.lineTo(l.x,l.y); ctx.closePath();
-    // หินหยกเขียวอมเทา ไล่เฉดตามความลึก
+    // พื้นดินทราย/หินอุ่น ไล่เฉดตามความลึก
     const depth=(i+j)/(2*GRID);
-    const base = shade ? [44,58,52] : [54,70,62];
-    const rC=Math.round(base[0]*(1-depth*0.35)), gC=Math.round(base[1]*(1-depth*0.3)), bC=Math.round(base[2]*(1-depth*0.3));
+    const base = shade ? [150,120,82] : [132,104,70];
+    const rC=Math.round(base[0]*(1-depth*0.34)), gC=Math.round(base[1]*(1-depth*0.34)), bC=Math.round(base[2]*(1-depth*0.34));
     ctx.fillStyle=`rgb(${rC},${gC},${bC})`; ctx.fill();
-    ctx.strokeStyle="rgba(232,194,90,0.10)"; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle="rgba(70,48,28,0.30)"; ctx.lineWidth=1; ctx.stroke();
   }
   // ขอบลานทอง
   ctx.strokeStyle="rgba(232,194,90,0.35)"; ctx.lineWidth=2;
@@ -729,9 +729,25 @@ function draw(){
       ctx.ellipse(c.x,c.y,TILE_W*0.36,TILE_H*0.36,0,-0.6+prog*2.4,0.8+prog*2.4); ctx.stroke();
     } else if(sl.skill.shape==="radial"){
       const prog=sl.t/0.4, R=sl.skill.radius*(0.4+prog*0.7);
-      ctx.beginPath(); ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.stroke();
-      ctx.globalAlpha=a*0.13; ctx.beginPath();
+      // วงคลื่นทอง 2 ชั้น
+      ctx.lineWidth=4; ctx.beginPath();
+      ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.stroke();
+      ctx.lineWidth=2; ctx.globalAlpha=a*0.6; ctx.beginPath();
+      ctx.ellipse(c.x,c.y,R*TILE_W/2*0.7,R*TILE_H/2*0.7,0,0,7); ctx.stroke();
+      ctx.globalAlpha=a*0.16; ctx.beginPath();
       ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.fill();
+      // แกนระเบิดสว่างกลางวง (ช่วงต้น) + ลำพุ่งขึ้น
+      const core=clamp(1-prog*2,0,1);
+      if(core>0){
+        const cg=ctx.createRadialGradient(c.x,c.y,2,c.x,c.y,38);
+        cg.addColorStop(0,`rgba(255,248,210,${core})`);
+        cg.addColorStop(.5,`rgba(255,210,110,${core*0.8})`);
+        cg.addColorStop(1,"rgba(255,180,60,0)");
+        ctx.globalAlpha=1; ctx.fillStyle=cg;
+        ctx.beginPath(); ctx.arc(c.x,c.y,38,0,7); ctx.fill();
+        ctx.fillStyle=`rgba(255,240,200,${core*0.9})`;
+        ctx.beginPath(); ctx.ellipse(c.x,c.y-18,7,26,0,0,7); ctx.fill();
+      }
     } else if(sl.skill.shape==="cross"){
       const L=sl.skill.length;
       for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){
