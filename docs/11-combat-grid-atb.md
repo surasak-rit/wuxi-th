@@ -274,7 +274,7 @@ DamageEvent = { target_id, amount, kind, world_pos, tick }
 ## 12. ลำดับพัฒนาโหมดนี้ (ต่อจาก roadmap หลัก)
 1. **Prototype แกน:** กริด + เคลื่อนที่ real-time + Action Gauge + Radial AoE + floating text (1 สำนัก)
 2. AI archetype (swarm/ranged) + telegraph หลบ + collision/pathfinding
-3. ครบ 5 สำนัก (map ท่าวิชาเดิม → shape เชิงพื้นที่) + บอสเฟสบนกริด
+3. ครบ 6 สำนัก (map ท่าวิชาเดิม → shape เชิงพื้นที่) + บอสเฟสบนกริด
 4. polish: ตัวเลขรวม, juice (สั่นจอ/เอฟเฟกต์), tuning pass, มือถือ UX
 
 ---

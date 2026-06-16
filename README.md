@@ -19,9 +19,9 @@
 GDD-ยุทธภพชางหลาน.md        ภาพรวม + core loop + สารบัญ
 docs/
  ├─ 01-combat-system.md     ระบบต่อสู้เชิงลึก
- ├─ 02-skills-cultivation.md ระบบวิชา + สายวิชา 5 สำนัก
+ ├─ 02-skills-cultivation.md ระบบวิชา + สายวิชา 6 สำนัก
  ├─ 03-progression-fame.md  Combat EXP / ชื่อเสียง / ตารางต้นทุน
- ├─ 04-sects.md             5 สำนักเต็ม + counter matrix
+ ├─ 04-sects.md             6 สำนักเต็ม + counter matrix
  ├─ 05-items-economy.md     ไอเทม / คราฟต์ / เศรษฐกิจ
  ├─ 06-pvp-social.md        PvP / สังคม / สงครามสำนัก
  ├─ 07-world-lore.md        โลก / เนื้อเรื่อง 9 องก์
