@@ -95,7 +95,7 @@ rested_pool += rest_rate * time_offline      # เพดาน rested = 1 วั
 ใช้ใน: คำนวณ EXP, จับคู่ PvP/ลีก, จัดระดับมอน/บอส, แสดง "ความแกร่ง" ของผู้เล่น
 ```python
 PI = sum(attributes)                 # สูงสุด 400 (4 ค่า x 100)
-   + sum(skill_level)               # active4+passive2 เต็ม Lv100 = 600
+   + sum(skill_level)               # active4+passive2 เต็ม Lv100 = 600 (วิชาสุดยอดถึง Lv200 ดู docs/02 §9)
    + gear_score                      # อุปกรณ์ (ดู docs/05)
    + fame_level * 5                  # 5..25
 # ช่วง PI โดยประมาณ: เริ่มเกม ~60 / กลาง ~500 / ปลาย ~1,200 / สุด(เทพ) ~2,000+
