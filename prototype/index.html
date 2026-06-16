@@ -3,78 +3,90 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>ยุทธภพชางหลาน — Prototype ระบบต่อสู้</title>
+<title>ยุทธภพชางหลาน — Prototype ระบบต่อสู้ (2.5D)</title>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --line:#30363d; --ink:#e6edf3; --dim:#8b949e;
-    --gold:#e3b341; --blade:#58a6ff; --hp:#3fb950; --mp:#58a6ff; --gauge:#e3b341;
-    --enemy:#f85149;
+    --ink:#f3e9d2; --dim:#b9a988; --gold:#e8c25a; --jade:#5fbf9b;
+    --red:#c0392b; --hp:#7ec96b; --mp:#7fb4ff; --enemy:#f85149;
+    --lacquer:#1a1008; --lacquer2:#2a1a0e;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
-    font-family:"Segoe UI","Noto Sans Thai",system-ui,sans-serif;overflow:hidden;}
-  #wrap{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:center;gap:10px;padding:8px;}
-  #stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;
-    box-shadow:0 10px 40px rgba(0,0,0,.5);touch-action:none;background:#0a0e14;}
-  canvas{display:block;}
-  #hud{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;
-    font-size:13px;color:var(--dim);max-width:600px;}
-  .tag{color:var(--gold);font-weight:600;}
-  #skills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-  .skill{position:relative;width:96px;height:62px;border:1px solid var(--line);
-    border-radius:10px;background:var(--panel);cursor:pointer;overflow:hidden;
-    display:flex;flex-direction:column;justify-content:center;align-items:center;
-    padding:4px;user-select:none;transition:transform .05s;}
-  .skill:active{transform:scale(.95);}
-  .skill .nm{font-size:12px;font-weight:600;z-index:2;text-align:center;line-height:1.15;}
-  .skill .key{position:absolute;top:3px;left:5px;font-size:10px;color:var(--dim);z-index:2;}
-  .skill .fill{position:absolute;left:0;bottom:0;width:100%;background:rgba(227,179,65,.18);z-index:1;}
-  .skill.ready{border-color:var(--gold);box-shadow:0 0 12px rgba(227,179,65,.35);}
-  .skill.ready .nm{color:var(--gold);}
-  #title{font-size:15px;color:var(--ink);text-align:center;}
+  html,body{margin:0;height:100%;color:var(--ink);overflow:hidden;
+    font-family:"Noto Sans Thai","Segoe UI",system-ui,sans-serif;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #3a2410 0%, #1a0f06 55%, #0c0703 100%);}
+  #wrap{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:center;gap:9px;padding:8px;}
+  #title{font-size:16px;text-align:center;letter-spacing:.5px;}
+  #title .cn{color:var(--gold);font-weight:700;font-size:19px;
+    text-shadow:0 0 12px rgba(232,194,90,.4);}
+  #title .sect{color:var(--jade);font-weight:600;}
   #title small{color:var(--dim);font-weight:400;}
-  #banner{position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;
-    align-items:center;justify-content:center;background:rgba(5,8,12,.78);z-index:10;
-    text-align:center;cursor:pointer;}
-  #banner h1{margin:0;font-size:26px;color:var(--gold);}
-  #banner p{margin:2px;color:var(--dim);font-size:13px;max-width:440px;line-height:1.5;}
-  #banner .go{margin-top:8px;padding:9px 22px;border:1px solid var(--gold);border-radius:8px;
-    color:var(--gold);font-weight:700;}
+  #hud{display:flex;gap:13px;align-items:center;flex-wrap:wrap;justify-content:center;
+    font-size:13px;color:var(--dim);max-width:640px;}
+  .tag{color:var(--gold);font-weight:700;}
+  #stage{position:relative;border:2px solid #6e4a1e;border-radius:6px;overflow:hidden;
+    box-shadow:0 14px 50px rgba(0,0,0,.65), inset 0 0 0 2px rgba(232,194,90,.12);
+    touch-action:none;background:#0a0703;}
+  canvas{display:block;}
+  #skills{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+  .skill{position:relative;width:100px;height:64px;border:1px solid #6e4a1e;
+    border-radius:8px;cursor:pointer;overflow:hidden;user-select:none;
+    background:linear-gradient(#241608,#160d04);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;padding:4px;
+    transition:transform .05s;}
+  .skill:active{transform:scale(.95);}
+  .skill .nm{font-size:12px;font-weight:700;z-index:2;text-align:center;line-height:1.15;color:var(--ink);}
+  .skill .cnk{position:absolute;top:2px;left:6px;font-size:13px;color:var(--gold);z-index:2;font-weight:700;opacity:.7;}
+  .skill .fill{position:absolute;left:0;bottom:0;width:100%;background:rgba(232,194,90,.16);z-index:1;}
+  .skill.ready{border-color:var(--gold);box-shadow:0 0 14px rgba(232,194,90,.45);}
+  .skill.ready .nm{color:var(--gold);}
+  #banner{position:absolute;inset:0;display:flex;flex-direction:column;gap:7px;
+    align-items:center;justify-content:center;z-index:10;text-align:center;cursor:pointer;
+    background:radial-gradient(60% 60% at 50% 40%, rgba(20,12,5,.72), rgba(6,4,2,.9));}
+  #banner h1{margin:0;font-size:30px;color:var(--gold);letter-spacing:3px;
+    text-shadow:0 0 18px rgba(232,194,90,.5);}
+  #banner .sub{color:var(--jade);font-size:14px;margin:-2px 0 6px;letter-spacing:6px;}
+  #banner p{margin:2px;color:var(--dim);font-size:13px;max-width:460px;line-height:1.55;}
+  #banner .go{margin-top:10px;padding:10px 26px;border:1px solid var(--gold);border-radius:6px;
+    color:var(--gold);font-weight:700;background:rgba(232,194,90,.06);letter-spacing:2px;}
   .hide{display:none !important;}
 </style>
 </head>
 <body>
 <div id="wrap">
-  <div id="title"><span class="tag">เขาเมฆขาว</span> · จอมยุทธ์กระบี่ &nbsp;<small>— prototype ระบบต่อสู้ Real-time Grid ATB</small></div>
+  <div id="title"><span class="cn">蒼瀾江湖</span> &nbsp;<span class="sect">สำนักเขาเมฆขาว</span> · จอมยุทธ์กระบี่
+    &nbsp;<small>— prototype 2.5D · Real-time Grid ATB</small></div>
   <div id="hud">
     <span>เลือด <b id="hpv" style="color:var(--hp)">—</b></span>
     <span>ลมปราณ <b id="mpv" style="color:var(--mp)">—</b></span>
     <span>คลื่น <b id="wavev" class="tag">1</b></span>
     <span>สังหาร <b id="killv" class="tag">0</b></span>
-    <span style="color:var(--dim)">แตะ/คลิกพื้น = เดิน · กด 1/2/3 หรือปุ่ม = ออกท่า</span>
+    <span style="color:var(--dim)">แตะพื้น = เดิน · 一二三 / ปุ่ม = ออกท่า</span>
   </div>
   <div id="stage">
     <canvas id="cv"></canvas>
     <div id="banner">
       <h1>ยุทธภพชางหลาน</h1>
+      <div class="sub">蒼 瀾 江 湖</div>
       <p>ยืนกลางวงล้อม สะบัดกระบี่ท่าเดียวกระจายศัตรูทั้งวง — เดินจัดตำแหน่งให้ศัตรูกระจุกเข้ารัศมี
       แล้วปล่อยท่า AoE ทีเดียว หลอดพลัง (ATB) เติมตามเวลาจริง เต็มเมื่อไรจึงออกท่าได้</p>
-      <p style="color:var(--gold)">แตะพื้นเพื่อเดิน · 1 = กระบี่ปาดแนว · 2 = กากบาทเมฆ · 3 = วงล้อมเมฆพิฆาต (ท่าไม้ตาย)</p>
+      <p style="color:var(--gold)">แตะพื้นเพื่อเดิน · 一 กระบี่ปาดแนว · 二 กากบาทเมฆ · 三 วงล้อมเมฆพิฆาต (ท่าไม้ตาย)</p>
       <div class="go">แตะเพื่อเริ่ม</div>
     </div>
   </div>
   <div id="skills">
-    <div class="skill" data-i="0"><span class="key">1</span><div class="fill"></div><span class="nm">กระบี่<br>ปาดแนว</span></div>
-    <div class="skill" data-i="1"><span class="key">2</span><div class="fill"></div><span class="nm">กากบาท<br>เมฆ</span></div>
-    <div class="skill" data-i="2"><span class="key">3</span><div class="fill"></div><span class="nm">วงล้อม<br>เมฆพิฆาต</span></div>
+    <div class="skill" data-i="0"><span class="cnk">一</span><div class="fill"></div><span class="nm">กระบี่<br>ปาดแนว</span></div>
+    <div class="skill" data-i="1"><span class="cnk">二</span><div class="fill"></div><span class="nm">กากบาท<br>เมฆ</span></div>
+    <div class="skill" data-i="2"><span class="cnk">三</span><div class="fill"></div><span class="nm">วงล้อม<br>เมฆพิฆาต</span></div>
   </div>
 </div>
 <script>
 "use strict";
 /* =========================================================================
-   ยุทธภพชางหลาน — Combat Prototype
+   ยุทธภพชางหลาน — Combat Prototype (2.5D Isometric, สไตล์เกมจีนคลาสสิก)
    ระบบต่อสู้ Real-time บนกริด + Action Gauge (ATB) + Radial AoE + Floating Damage
    ค่าคงที่/สูตรอ้างอิงจาก docs/11 (combat-grid-atb) และ docs/12 (skill-shapes)
+   *** ระบบจำลอง (simulation) ยังทำงานบนพิกัดกริดเดิม — เปลี่ยนเฉพาะการเรนเดอร์เป็น iso 2.5D ***
    ========================================================================= */
 
 // ---- ค่าคงที่ ATB (docs/11 §5, §11) ----
@@ -83,18 +95,23 @@ const SIM_TICK=20, DT=1/SIM_TICK;          // 20 Hz fixed tick
 const BASE_MOVE=2.0;                        // tiles/sec ฐาน (docs/11 §6)
 
 // ---- กริด (docs/11 §3) — square_8, ระยะ Chebyshev ----
-const GRID=16, CELL=38;
-const W=GRID*CELL, H=GRID*CELL;
+const GRID=16;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function gridDist(a,b){ // Chebyshev (square_8) เป็นช่อง
-  return Math.max(Math.abs(a.x-b.x), Math.abs(a.y-b.y));
-}
+function gridDist(a,b){ return Math.max(Math.abs(a.x-b.x), Math.abs(a.y-b.y)); }
 function dist(a,b){const dx=a.x-b.x,dy=a.y-b.y;return Math.hypot(dx,dy);}
+
+// ---- โปรเจกชัน 2.5D ไอโซเมตริก ----
+const TILE_W=46, TILE_H=23;                 // 2:1 iso tile
+const CW=782, CH=586, ORIGIN_X=CW/2, ORIGIN_Y=92;
+function iso(gx,gy){ return { x:ORIGIN_X+(gx-gy)*TILE_W/2, y:ORIGIN_Y+(gx+gy)*TILE_H/2 }; }
+function unIso(sx,sy){
+  const a=(sx-ORIGIN_X)/(TILE_W/2), b=(sy-ORIGIN_Y)/(TILE_H/2);
+  return { x:(a+b)/2, y:(b-a)/2 };
+}
 
 // ---- สูตร ATB (docs/11 §5) ----
 function chargeTime(SPD){return clamp(BASE_CT*SPD_REF/(SPD+SPD_REF),CT_MIN,CT_MAX);}
 function fillPerSec(u){return (GAUGE_CAP/chargeTime(u.SPD))*(u.haste||1);}
-// ความเร็วเดิน (docs/11 §6): ปฏิภาณ ขับความเร็ว
 function moveSpeed(u){return clamp(BASE_MOVE*(1+u.agi/120),1.5,6.0);}
 
 // ---- สูตรดาเมจ (อิง docs/01 §4: raw = ATK*mult - DEF*0.5) ----
@@ -108,17 +125,16 @@ function damage(a,t,mult,crit){
 }
 
 const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
-cv.width=W; cv.height=H;
+cv.width=CW; cv.height=CH;
 
 // ====================== สกิล (docs/12 — shapes) ======================
-// shape: radial(radius) | line(length,width) | cross(length)
 const SKILLS=[
   { id:"line", name:"กระบี่ปาดแนว", shape:"line", length:5, width:1,
-    mult:1.25, mp:8, gaugeCost:GAUGE_CAP, cast:0.10, color:"#9ecbff", maxTargets:8 },
+    mult:1.25, mp:8, gaugeCost:GAUGE_CAP, cast:0.10, color:"#bfe0ff", maxTargets:8 },
   { id:"cross", name:"กากบาทเมฆ", shape:"cross", length:4,
-    mult:1.45, mp:14, gaugeCost:GAUGE_CAP, cast:0.18, color:"#58a6ff", maxTargets:12 },
+    mult:1.45, mp:14, gaugeCost:GAUGE_CAP, cast:0.18, color:"#7fb4ff", maxTargets:12 },
   { id:"radial", name:"วงล้อมเมฆพิฆาต", shape:"radial", radius:3.2,
-    mult:1.75, mp:26, gaugeCost:GAUGE_CAP, cast:0.25, color:"#e3b341", maxTargets:16,
+    mult:1.75, mp:26, gaugeCost:GAUGE_CAP, cast:0.25, color:"#e8c25a", maxTargets:16,
     falloff:{inner:1.6, outerMult:0.7} },
 ];
 
@@ -128,95 +144,75 @@ function makePlayer(){
     side:"player", x:GRID/2, y:GRID/2, r:0.42,
     hp:520, maxhp:520, mp:120, maxmp:120,
     atk:62, def:24, acc:90, eva:35, crit:0.28,
-    agi:120,                       // ปฏิภาณ → ความเร็วเดิน
-    SPD:120*2+0.3*60,              // SPD = ปฏิภาณ*2 + ความกล้า*0.3 (docs/15)
-    gauge:GAUGE_CAP, haste:1,
-    moveTo:null, face:{x:0,y:-1}, castLock:0, hitFlash:0,
+    agi:120, SPD:120*2+0.3*60, gauge:GAUGE_CAP, haste:1,
+    moveTo:null, face:{x:1,y:0}, faceX:1, castLock:0, hitFlash:0, atkAnim:0,
   };
 }
 let UID=1;
 function makeEnemy(kind,x,y){
   const base={ side:"enemy", id:UID++, x, y, r:0.36, kind,
-    gauge:Math.random()*GAUGE_CAP, haste:1, moveTo:null, castLock:0, hitFlash:0, atkRange:1.2 };
-  if(kind==="swarm")  return Object.assign(base,{hp:60,maxhp:60,atk:16,def:8,acc:70,eva:18,crit:.05,agi:55,SPD:70,col:"#f85149",dmgMult:0.9,sz:.34});
-  if(kind==="fast")   return Object.assign(base,{hp:42,maxhp:42,atk:14,def:5,acc:80,eva:40,crit:.10,agi:110,SPD:150,col:"#ff9d5c",dmgMult:0.8,sz:.30});
-  if(kind==="brute")  return Object.assign(base,{hp:220,maxhp:220,atk:30,def:22,acc:75,eva:6,crit:.05,agi:35,SPD:45,col:"#bc5cff",dmgMult:1.4,sz:.52,atkRange:1.5});
+    gauge:Math.random()*GAUGE_CAP, haste:1, moveTo:null, castLock:0, hitFlash:0,
+    atkAnim:0, faceX:1, atkRange:1.2 };
+  if(kind==="swarm")  return Object.assign(base,{hp:60,maxhp:60,atk:16,def:8,acc:70,eva:18,crit:.05,agi:55,SPD:70,sz:.34,dmgMult:0.9,pal:"bandit",H:34});
+  if(kind==="fast")   return Object.assign(base,{hp:42,maxhp:42,atk:14,def:5,acc:80,eva:40,crit:.10,agi:110,SPD:150,sz:.30,dmgMult:0.8,pal:"scout",H:32});
+  if(kind==="brute")  return Object.assign(base,{hp:220,maxhp:220,atk:30,def:22,acc:75,eva:6,crit:.05,agi:35,SPD:45,sz:.52,dmgMult:1.4,atkRange:1.5,pal:"brute",H:58});
   return base;
 }
 
 // ====================== สถานะเกม ======================
-let player, enemies, floats, slashes, particles, wave, kills, acc=0, last=0, running=false, gameover=false;
+let player, enemies, floats, slashes, particles, wave, kills, acc=0, last=0, running=false, gameover=false, screenShake=0;
 
 function spawnWave(n){
-  const ring=[];
-  const count = 5 + n*2;
+  const ring=[]; const count = 5 + n*2;
   for(let i=0;i<count;i++){
-    const ang=Math.random()*Math.PI*2;
-    const rad=5.5+Math.random()*2.5;
+    const ang=Math.random()*Math.PI*2, rad=5.5+Math.random()*2.5;
     let x=clamp(player.x+Math.cos(ang)*rad,0.6,GRID-0.6);
     let y=clamp(player.y+Math.sin(ang)*rad,0.6,GRID-0.6);
-    let kind="swarm";
-    const roll=Math.random();
-    if(roll>0.82 && n>=2) kind="brute";
-    else if(roll>0.55) kind="fast";
+    let kind="swarm"; const roll=Math.random();
+    if(roll>0.82 && n>=2) kind="brute"; else if(roll>0.55) kind="fast";
     ring.push(makeEnemy(kind,x,y));
   }
   return ring;
 }
-
 function reset(){
-  player=makePlayer();
-  enemies=spawnWave(1);
-  floats=[]; slashes=[]; particles=[];
-  wave=1; kills=0; gameover=false;
+  player=makePlayer(); enemies=spawnWave(1);
+  floats=[]; slashes=[]; particles=[]; wave=1; kills=0; gameover=false;
   updateHud();
 }
 
 // ====================== Floating Damage (docs/11 §8) ======================
 function addFloat(wx,wy,txt,kind){
-  floats.push({x:wx,y:wy,txt,kind,t:0,
-    jitter:(Math.random()-0.5)*0.4, vy:-1.4-(kind==="crit"?0.6:0),
-    delay:Math.random()*0.05}); // jitter เชิงภาพ แต่ค่าคิดพร้อมกัน
+  floats.push({x:wx,y:wy,txt,kind,t:0,jitter:(Math.random()-0.5)*0.4,
+    vy:-1.4-(kind==="crit"?0.6:0),delay:Math.random()*0.05});
 }
-function addTotal(total,n){ // ตัวเลขรวมทั้งวงกลางจอ (docs/11 §8)
-  if(n<3) return;
+function addTotal(total,n){ if(n<3) return;
   floats.push({x:player.x,y:player.y-1.4,txt:"รวม "+total,kind:"total",t:0,jitter:0,vy:-1.0,delay:0});
 }
 
 // ====================== สร้างช่องที่โดนผล (docs/12 §2) ======================
 function shapeCells(skill,facing){
-  // คืนค่า list ของ offset (เป็นช่อง) เทียบจากตัวผู้ร่าย
   const cells=[];
   if(skill.shape==="line"){
-    // ทิศตามการหันหน้า
     const dir = Math.abs(facing.x)>Math.abs(facing.y)
-      ? {x:Math.sign(facing.x),y:0} : {x:0,y:Math.sign(facing.y)||-1};
+      ? {x:Math.sign(facing.x)||1,y:0} : {x:0,y:Math.sign(facing.y)||-1};
     const half=Math.floor(skill.width/2);
-    for(let i=1;i<=skill.length;i++){
-      for(let w=-half;w<=half;w++){
-        if(dir.x!==0) cells.push({x:dir.x*i,y:w});
-        else          cells.push({x:w,y:dir.y*i});
-      }
+    for(let i=1;i<=skill.length;i++) for(let w=-half;w<=half;w++){
+      if(dir.x!==0) cells.push({x:dir.x*i,y:w}); else cells.push({x:w,y:dir.y*i});
     }
   } else if(skill.shape==="cross"){
-    for(let i=1;i<=skill.length;i++){
-      cells.push({x:i,y:0},{x:-i,y:0},{x:0,y:i},{x:0,y:-i});
-    }
+    for(let i=1;i<=skill.length;i++) cells.push({x:i,y:0},{x:-i,y:0},{x:0,y:i},{x:0,y:-i});
   }
-  return cells; // radial จัดการแยก (วัดรัศมีต่อเนื่อง)
+  return cells;
 }
 
 // ====================== ปล่อยท่า (docs/11 §7, docs/12) ======================
 function castSkill(idx){
   if(!running||gameover) return;
   const s=SKILLS[idx];
-  if(player.gauge<s.gaugeCost) return;     // หลอดยังไม่เต็ม
+  if(player.gauge<s.gaugeCost) return;
   if(player.mp<s.mp){ addFloat(player.x,player.y-0.6,"ลมปราณไม่พอ","miss"); return; }
-  player.mp-=s.mp;
-  player.gauge-=s.gaugeCost;
-  player.castLock=s.cast;
+  player.mp-=s.mp; player.gauge-=s.gaugeCost; player.castLock=s.cast; player.atkAnim=1;
 
-  // หาเป้า
   let targets=[];
   if(s.shape==="radial"){
     targets=enemies.filter(e=>e.hp>0 && gridDist(player,e)<=s.radius);
@@ -231,11 +227,9 @@ function castSkill(idx){
   targets.sort((a,b)=>dist(player,a)-dist(player,b));
   targets=targets.slice(0,s.maxTargets);
 
-  // เอฟเฟกต์ภาพของท่า
   slashes.push({skill:s, face:{...player.face}, t:0, x:player.x, y:player.y});
   screenShake = s.shape==="radial"?7:3;
 
-  // คิดดาเมจ — emit พร้อมกัน (batched)
   let total=0, hitN=0;
   for(const t of targets){
     if(!rollHit(player,t)){ addFloat(t.x,t.y,"พลาด","miss"); continue; }
@@ -243,20 +237,16 @@ function castSkill(idx){
     if(s.falloff && gridDist(player,t)>s.falloff.inner) mult*=s.falloff.outerMult;
     const crit=rollCrit(player);
     const dmg=damage(player,t,mult,crit);
-    t.hp-=dmg; t.hitFlash=0.18;
-    total+=dmg; hitN++;
+    t.hp-=dmg; t.hitFlash=0.18; total+=dmg; hitN++;
     addFloat(t.x,t.y-0.4,dmg,crit?"crit":"normal");
-    // ดันถอย (knockback เบาๆ ตามทิศจากผู้ร่าย)
     const a=Math.atan2(t.y-player.y,t.x-player.x);
     t.x=clamp(t.x+Math.cos(a)*0.5,0.5,GRID-0.5);
     t.y=clamp(t.y+Math.sin(a)*0.5,0.5,GRID-0.5);
     for(let p=0;p<6;p++) spawnSpark(t.x,t.y,s.color);
   }
-  addTotal(total,hitN);
-  updateHud();
+  addTotal(total,hitN); updateHud();
 }
 
-// ====================== particles ======================
 function spawnSpark(x,y,col){
   const a=Math.random()*Math.PI*2, sp=1+Math.random()*3;
   particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,t:0,life:0.4+Math.random()*0.3,col});
@@ -264,91 +254,84 @@ function spawnSpark(x,y,col){
 
 // ====================== AI ศัตรู (docs/11 §9) ======================
 function enemyAI(e){
-  // เดินเข้าหา player; brute ช้าแต่ body-block, fast วิ่งไว
   const d=dist(e,player);
   if(d>e.atkRange){
     const a=Math.atan2(player.y-e.y,player.x-e.x);
     const sp=moveSpeed(e)*DT;
     e.x=clamp(e.x+Math.cos(a)*sp,0.4,GRID-0.4);
     e.y=clamp(e.y+Math.sin(a)*sp,0.4,GRID-0.4);
-  } else if(e.gauge>=GAUGE_CAP && e.castLock<=0){
-    // โจมตีประชิด
-    e.gauge-=GAUGE_CAP; e.castLock=0.3;
-    if(rollHit(e,player)){
-      const crit=rollCrit(e);
-      const dmg=damage(e,player,e.dmgMult,crit);
-      player.hp-=dmg; player.hitFlash=0.25; screenShake=Math.max(screenShake,4);
-      addFloat(player.x,player.y-0.4,dmg,crit?"crit":"enemyhit");
-      if(player.hp<=0){ player.hp=0; endGame(false); }
-      updateHud();
-    } else addFloat(player.x,player.y-0.4,"หลบ","miss");
+    e.faceX = (player.x-e.x)>=0?1:-1; e.moving=true;
+  } else {
+    e.moving=false; e.faceX=(player.x-e.x)>=0?1:-1;
+    if(e.gauge>=GAUGE_CAP && e.castLock<=0){
+      e.gauge-=GAUGE_CAP; e.castLock=0.3; e.atkAnim=1;
+      if(rollHit(e,player)){
+        const crit=rollCrit(e), dmg=damage(e,player,e.dmgMult,crit);
+        player.hp-=dmg; player.hitFlash=0.25; screenShake=Math.max(screenShake,4);
+        addFloat(player.x,player.y-0.4,dmg,crit?"crit":"enemyhit");
+        if(player.hp<=0){ player.hp=0; endGame(false); }
+        updateHud();
+      } else addFloat(player.x,player.y-0.4,"หลบ","miss");
+    }
   }
 }
-
-// soft collision (docs/11 §3) — ดันแยกหน่วยที่ทับกัน
 function separate(){
   for(let i=0;i<enemies.length;i++){
     const a=enemies[i]; if(a.hp<=0) continue;
     for(let j=i+1;j<enemies.length;j++){
       const b=enemies[j]; if(b.hp<=0) continue;
-      const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), min=a.sz+b.sz;
-      if(d>0 && d<min){
-        const push=(min-d)/2/d;
-        a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push;
-      }
+      const dx=b.x-a.x, dy=b.y-a.y, dd=Math.hypot(dx,dy), min=a.sz+b.sz;
+      if(dd>0 && dd<min){ const push=(min-dd)/2/dd;
+        a.x-=dx*push; a.y-=dy*push; b.x+=dx*push; b.y+=dy*push; }
     }
   }
 }
 
 // ====================== ลูปจำลอง (docs/11 §4) ======================
-let screenShake=0;
 function step(){
-  // 1) input/movement player
   if(player.moveTo){
     const a=Math.atan2(player.moveTo.y-player.y,player.moveTo.x-player.x);
     const sp=moveSpeed(player)*DT*(player.castLock>0?0.3:1);
-    const d=dist(player,player.moveTo);
-    if(d<0.08){ player.moveTo=null; }
+    if(dist(player,player.moveTo)<0.08){ player.moveTo=null; player.moving=false; }
     else { player.x=clamp(player.x+Math.cos(a)*sp,0.4,GRID-0.4);
            player.y=clamp(player.y+Math.sin(a)*sp,0.4,GRID-0.4);
-           player.face={x:Math.cos(a),y:Math.sin(a)}; }
-  }
-  // 2) เติม Action Gauge ทุกหน่วย (อิสระตามเวลาจริง)
+           player.face={x:Math.cos(a),y:Math.sin(a)};
+           if(Math.abs(Math.cos(a))>0.15) player.faceX=Math.cos(a)>=0?1:-1;
+           player.moving=true; }
+  } else player.moving=false;
+
   player.gauge=Math.min(OVERFLOW_CAP,player.gauge+fillPerSec(player)*DT);
   if(player.castLock>0) player.castLock-=DT;
   if(player.hitFlash>0) player.hitFlash-=DT;
-  // regen ลมปราณเล็กน้อย
+  if(player.atkAnim>0) player.atkAnim=Math.max(0,player.atkAnim-DT/0.3);
   player.mp=Math.min(player.maxmp,player.mp+6*DT);
 
-  // 3) AI + gauge ศัตรู
   for(const e of enemies){
     if(e.hp<=0) continue;
     e.gauge=Math.min(OVERFLOW_CAP,e.gauge+fillPerSec(e)*DT);
     if(e.castLock>0) e.castLock-=DT;
     if(e.hitFlash>0) e.hitFlash-=DT;
+    if(e.atkAnim>0) e.atkAnim=Math.max(0,e.atkAnim-DT/0.3);
     enemyAI(e);
   }
   separate();
 
-  // 4) เก็บศพ + นับสังหาร
   const before=enemies.length;
-  for(const e of enemies) if(e.hp<=0 && !e._counted){ e._counted=true; kills++; for(let p=0;p<10;p++) spawnSpark(e.x,e.y,e.col); }
+  for(const e of enemies) if(e.hp<=0 && !e._counted){ e._counted=true; kills++;
+    for(let p=0;p<10;p++) spawnSpark(e.x,e.y,"#f0c66a"); }
   enemies=enemies.filter(e=>e.hp>0);
   if(enemies.length!==before) updateHud();
 
-  // 5) คลื่นถัดไป
   if(enemies.length===0 && !gameover){
     wave++; enemies=spawnWave(wave);
-    player.hp=Math.min(player.maxhp,player.hp+90); // ฟื้นเลือดข้ามคลื่น
-    addFloat(player.x,player.y-1,"คลื่น "+wave,"wave");
-    updateHud();
+    player.hp=Math.min(player.maxhp,player.hp+90);
+    addFloat(player.x,player.y-1,"คลื่น "+wave,"wave"); updateHud();
   }
 
-  // เอฟเฟกต์
   for(const f of floats){ f.t+=DT; f.y+=f.vy*DT; }
   floats=floats.filter(f=>f.t<1.1);
   for(const s of slashes) s.t+=DT;
-  slashes=slashes.filter(s=>s.t<0.35);
+  slashes=slashes.filter(s=>s.t<0.4);
   for(const p of particles){ p.t+=DT; p.x+=p.vx*DT; p.y+=p.vy*DT; p.vx*=0.9; p.vy*=0.9; }
   particles=particles.filter(p=>p.t<p.life);
   if(screenShake>0) screenShake*=0.85;
@@ -356,131 +339,257 @@ function step(){
 
 function endGame(win){
   gameover=true; running=false;
-  const b=document.getElementById("banner");
-  b.classList.remove("hide");
-  b.innerHTML = `<h1 style="color:${win?'var(--gold)':'var(--enemy)'}">${win?'ชนะ!':'พ่ายแพ้'}</h1>`+
+  const b=document.getElementById("banner"); b.classList.remove("hide");
+  b.innerHTML = `<h1 style="color:${win?'var(--gold)':'var(--enemy)'}">${win?'ชนะ! 勝':'พ่ายแพ้ 敗'}</h1>`+
     `<p>รอดได้ถึงคลื่น <b class="tag">${wave}</b> · สังหารศัตรู <b class="tag">${kills}</b> คน</p>`+
     `<div class="go">แตะเพื่อเล่นใหม่</div>`;
 }
 
-// ====================== เรนเดอร์ ======================
-function px(v){return v*CELL;}
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  ctx.save();
-  if(screenShake>0.3){ ctx.translate((Math.random()-0.5)*screenShake,(Math.random()-0.5)*screenShake); }
-
-  // พื้น/กริด
-  ctx.fillStyle="#0c1119"; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle="rgba(88,166,255,0.07)"; ctx.lineWidth=1;
-  for(let i=0;i<=GRID;i++){
-    ctx.beginPath();ctx.moveTo(px(i),0);ctx.lineTo(px(i),H);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,px(i));ctx.lineTo(W,px(i));ctx.stroke();
+// ====================== ฉากหลังหมึกจีน (วาดครั้งเดียวลง buffer) ======================
+let bgCanvas;
+function buildBackground(){
+  bgCanvas=document.createElement("canvas"); bgCanvas.width=CW; bgCanvas.height=CH;
+  const b=bgCanvas.getContext("2d");
+  // ท้องฟ้าหมึก
+  let g=b.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0,"#1a120a"); g.addColorStop(.5,"#120b05"); g.addColorStop(1,"#080502");
+  b.fillStyle=g; b.fillRect(0,0,CW,CH);
+  // ดวงจันทร์
+  b.fillStyle="rgba(232,220,180,0.10)";
+  b.beginPath(); b.arc(CW*0.78,70,46,0,7); b.fill();
+  b.fillStyle="rgba(232,220,180,0.05)";
+  b.beginPath(); b.arc(CW*0.78,70,70,0,7); b.fill();
+  // ภูเขาหมึก (เลเยอร์)
+  function mountain(yBase,h,col){
+    b.fillStyle=col; b.beginPath(); b.moveTo(0,yBase);
+    let x=0; while(x<CW){ const peak=yBase-h*(0.5+Math.random()*0.6);
+      b.lineTo(x+30,peak); b.lineTo(x+70,yBase-h*0.2); x+=80; }
+    b.lineTo(CW,yBase); b.closePath(); b.fill();
   }
+  mountain(150,90,"rgba(70,90,80,0.14)");
+  mountain(180,70,"rgba(50,70,62,0.18)");
+  mountain(210,60,"rgba(30,45,40,0.22)");
+  // เมฆริ้ว
+  b.fillStyle="rgba(200,210,200,0.04)";
+  for(let i=0;i<5;i++){ const y=40+i*22; b.fillRect(0,y,CW,5); }
+}
 
-  // จุดหมายเดิน
-  if(player.moveTo){
-    ctx.strokeStyle="rgba(227,179,65,0.5)";ctx.lineWidth=2;
-    ctx.beginPath();ctx.arc(px(player.moveTo.x),px(player.moveTo.y),8,0,7);ctx.stroke();
-  }
-
-  // เพรวิวรัศมีท่าไม้ตายเมื่อหลอดเต็ม (telegraph ฝั่งผู้เล่น)
-  if(player.gauge>=GAUGE_CAP && player.mp>=SKILLS[2].mp){
-    ctx.fillStyle="rgba(227,179,65,0.06)";
-    ctx.strokeStyle="rgba(227,179,65,0.22)"; ctx.lineWidth=1.5;
-    const R=SKILLS[2].radius;
+// ====================== วาดพื้นไอโซเมตริก (ลานหินหยก) ======================
+function drawFloor(){
+  // เงาใต้แพลตฟอร์ม
+  for(let i=0;i<GRID;i++) for(let j=0;j<GRID;j++){
+    const t=iso(i,j), r=iso(i+1,j), bo=iso(i+1,j+1), l=iso(i,j+1);
+    const shade=((i+j)%2===0);
     ctx.beginPath();
-    ctx.rect(px(player.x-R-0.5),px(player.y-R-0.5),px(2*R+1),px(2*R+1)); // Chebyshev = วงสี่เหลี่ยม
-    ctx.fill();ctx.stroke();
+    ctx.moveTo(t.x,t.y); ctx.lineTo(r.x,r.y); ctx.lineTo(bo.x,bo.y); ctx.lineTo(l.x,l.y); ctx.closePath();
+    // หินหยกเขียวอมเทา ไล่เฉดตามความลึก
+    const depth=(i+j)/(2*GRID);
+    const base = shade ? [44,58,52] : [54,70,62];
+    const rC=Math.round(base[0]*(1-depth*0.35)), gC=Math.round(base[1]*(1-depth*0.3)), bC=Math.round(base[2]*(1-depth*0.3));
+    ctx.fillStyle=`rgb(${rC},${gC},${bC})`; ctx.fill();
+    ctx.strokeStyle="rgba(232,194,90,0.10)"; ctx.lineWidth=1; ctx.stroke();
+  }
+  // ขอบลานทอง
+  ctx.strokeStyle="rgba(232,194,90,0.35)"; ctx.lineWidth=2;
+  const c0=iso(0,0), c1=iso(GRID,0), c2=iso(GRID,GRID), c3=iso(0,GRID);
+  ctx.beginPath(); ctx.moveTo(c0.x,c0.y); ctx.lineTo(c1.x,c1.y);
+  ctx.lineTo(c2.x,c2.y); ctx.lineTo(c3.x,c3.y); ctx.closePath(); ctx.stroke();
+}
+
+// ====================== sprite จอมยุทธ์ (วาดแบบ procedural) ======================
+const PALS={
+  hero:  {robe:"#eef2fa",robe2:"#b9cae0",sash:"#c0392b",skin:"#e6c6a0",hair:"#15110d",trim:"#e8c25a",weapon:"sword"},
+  bandit:{robe:"#8a3030",robe2:"#5e2020",sash:"#241010",skin:"#d8b48c",hair:"#15110d",trim:"#3a1818",weapon:"saber"},
+  scout: {robe:"#caa15a",robe2:"#9c7a3a",sash:"#2a1f10",skin:"#dcb892",hair:"#15110d",trim:"#7a5e2a",weapon:"dagger"},
+  brute: {robe:"#4a3b6b",robe2:"#332a4d",sash:"#1f1730",skin:"#cdaa7a",hair:"#15110d",trim:"#9183c4",weapon:"club",armored:true},
+};
+function drawFigure(sx,sy,H,facing,moving,attack,flash,palKey,now){
+  const s=H/42, pal=PALS[palKey]||PALS.hero;
+  ctx.save(); ctx.translate(sx,sy);
+  // เงา
+  ctx.fillStyle="rgba(0,0,0,0.34)";
+  ctx.beginPath(); ctx.ellipse(0,0,9*s,4*s,0,0,7); ctx.fill();
+  const bob = moving ? Math.abs(Math.sin(now/120))*2*s : Math.sin(now/640)*0.9*s;
+  ctx.translate(0,-bob);
+  ctx.scale(facing,1);
+  const bh=H*0.78, bw=15*s, sw=11*s;
+  // ลำตัว/เสื้อคลุม
+  ctx.fillStyle=flash?"#ffffff":pal.robe;
+  ctx.beginPath(); ctx.moveTo(-bw/2,0); ctx.lineTo(bw/2,0);
+  ctx.lineTo(sw/2,-bh); ctx.lineTo(-sw/2,-bh); ctx.closePath(); ctx.fill();
+  // เงาด้านขวาเสื้อ
+  ctx.fillStyle=flash?"#eef0f4":pal.robe2;
+  ctx.beginPath(); ctx.moveTo(1*s,0); ctx.lineTo(bw/2,0); ctx.lineTo(sw/2,-bh); ctx.lineTo(1*s,-bh*0.95); ctx.closePath(); ctx.fill();
+  // ชายเสื้อทอง
+  ctx.fillStyle=pal.trim; ctx.fillRect(-bw/2,-2.2*s,bw,2.2*s);
+  if(pal.armored){ // เกราะอก
+    ctx.fillStyle="rgba(20,15,30,0.55)"; ctx.fillRect(-sw/2,-bh*0.85,sw,bh*0.4);
+    ctx.fillStyle=pal.trim; ctx.fillRect(-sw/2,-bh*0.6,sw,1.4*s);
+  }
+  // ผ้าคาดเอว
+  ctx.fillStyle=pal.sash; ctx.fillRect(-sw/2-1*s,-bh*0.48,sw+2*s,4*s);
+  // คอเสื้อรูป V
+  ctx.strokeStyle=pal.trim; ctx.lineWidth=1.4*s; ctx.lineJoin="round";
+  ctx.beginPath(); ctx.moveTo(-3*s,-bh); ctx.lineTo(0,-bh*0.74); ctx.lineTo(3*s,-bh); ctx.stroke();
+  // หัว
+  const hy=-bh-4.6*s;
+  ctx.fillStyle=flash?"#ffffff":pal.skin;
+  ctx.beginPath(); ctx.arc(0,hy,4.6*s,0,7); ctx.fill();
+  // ผม + มวยผม
+  ctx.fillStyle=flash?"#ddd":pal.hair;
+  ctx.beginPath(); ctx.arc(0,hy-0.6*s,4.8*s,Math.PI*1.02,Math.PI*1.98); ctx.fill();
+  ctx.fillRect(-1.5*s,hy-8*s,3*s,3.4*s);
+  // แถบคาดผม (ฮีโร่)
+  if(palKey==="hero"){ ctx.fillStyle=pal.trim; ctx.fillRect(-4.8*s,hy-1.6*s,9.6*s,1.4*s); }
+  // อาวุธ (วาดด้านหน้า — แกน x บวกหลัง scale facing)
+  drawWeapon(pal.weapon, s, bh, attack, flash);
+  ctx.restore();
+}
+function drawWeapon(kind,s,bh,attack,flash){
+  ctx.save();
+  const hx=5.5*s, hy=-bh*0.5;            // ตำแหน่งมือ
+  ctx.translate(hx,hy);
+  // มุมแกว่ง: พัก = ชี้ขึ้น-หน้า, ขณะออกท่ากวาดลง
+  const ang = -1.15 + attack*1.9;
+  ctx.rotate(ang);
+  if(kind==="sword"){
+    const L=24*s;
+    // ด้าม+ การ์ดทอง
+    ctx.fillStyle="#3a2a14"; ctx.fillRect(-1.2*s,0,2.4*s,5*s);
+    ctx.fillStyle="#e8c25a"; ctx.fillRect(-3.2*s,-1*s,6.4*s,2*s);
+    // ใบกระบี่
+    const grad=ctx.createLinearGradient(0,0,0,-L);
+    grad.addColorStop(0,"#cdd6e0"); grad.addColorStop(.5,flash?"#fff":"#eef4ff"); grad.addColorStop(1,"#aab6c4");
+    ctx.fillStyle=grad;
+    ctx.beginPath(); ctx.moveTo(-1.4*s,-1*s); ctx.lineTo(1.4*s,-1*s);
+    ctx.lineTo(0.6*s,-L); ctx.lineTo(0,-L-3*s); ctx.lineTo(-0.6*s,-L); ctx.closePath(); ctx.fill();
+    // ประกายคม
+    if(attack>0.3){ ctx.globalAlpha=attack; ctx.strokeStyle="rgba(190,224,255,0.8)";
+      ctx.lineWidth=2*s; ctx.beginPath(); ctx.moveTo(0,-2*s); ctx.lineTo(0,-L); ctx.stroke(); ctx.globalAlpha=1; }
+  } else if(kind==="saber"){
+    const L=18*s; ctx.fillStyle="#2a1a10"; ctx.fillRect(-1*s,0,2*s,4*s);
+    ctx.strokeStyle=flash?"#fff":"#c6ccd4"; ctx.lineWidth=2.4*s; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(5*s,-L*0.6,2*s,-L); ctx.stroke();
+  } else if(kind==="dagger"){
+    const L=10*s; ctx.strokeStyle=flash?"#fff":"#d0d6de"; ctx.lineWidth=2*s; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-L); ctx.stroke();
+  } else if(kind==="club"){
+    const L=20*s; ctx.fillStyle="#3a2a18"; ctx.fillRect(-2*s,-L,4*s,L);
+    ctx.fillStyle="#5a4630"; ctx.beginPath(); ctx.arc(0,-L,5*s,0,7); ctx.fill();
+    ctx.fillStyle="#7a6038"; for(let k=0;k<4;k++){ const a=k/4*7;
+      ctx.fillRect(Math.cos(a)*4*s-1*s,-L+Math.sin(a)*4*s-1*s,2*s,2*s); }
+  }
+  ctx.restore();
+}
+
+// ====================== เรนเดอร์หลัก ======================
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  ctx.drawImage(bgCanvas,0,0);
+  ctx.save();
+  if(screenShake>0.3) ctx.translate((Math.random()-0.5)*screenShake,(Math.random()-0.5)*screenShake);
+
+  drawFloor();
+
+  // จุดหมายเดิน (วงบนพื้น iso)
+  if(player.moveTo){
+    const p=iso(player.moveTo.x,player.moveTo.y);
+    ctx.strokeStyle="rgba(232,194,90,0.6)"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(p.x,p.y,11,5.5,0,0,7); ctx.stroke();
+  }
+
+  // telegraph รัศมีท่าไม้ตายบนพื้น (วงรี iso) เมื่อหลอดเต็ม
+  if(player.gauge>=GAUGE_CAP && player.mp>=SKILLS[2].mp){
+    const c=iso(player.x,player.y), R=SKILLS[2].radius;
+    ctx.fillStyle="rgba(232,194,90,0.07)"; ctx.strokeStyle="rgba(232,194,90,0.28)"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.fill(); ctx.stroke();
+  }
+
+  // เอฟเฟกต์ท่าบนพื้น (วาดก่อน sprite)
+  for(const sl of slashes){
+    const a=clamp(1-sl.t/0.4,0,1), c=iso(sl.x,sl.y);
+    ctx.save(); ctx.globalAlpha=a;
+    ctx.strokeStyle=sl.skill.color; ctx.fillStyle=sl.skill.color; ctx.lineWidth=3;
+    if(sl.skill.shape==="radial"){
+      const prog=sl.t/0.4, R=sl.skill.radius*(0.4+prog*0.7);
+      ctx.beginPath(); ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.stroke();
+      ctx.globalAlpha=a*0.13; ctx.beginPath();
+      ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.fill();
+    } else if(sl.skill.shape==="cross"){
+      const L=sl.skill.length;
+      for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const e=iso(sl.x+d[0]*L, sl.y+d[1]*L);
+        ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(e.x,e.y); ctx.stroke();
+      }
+    } else { // line
+      const f=sl.face, L=sl.skill.length;
+      const dir=Math.abs(f.x)>Math.abs(f.y)?{x:Math.sign(f.x)||1,y:0}:{x:0,y:Math.sign(f.y)||-1};
+      const e=iso(sl.x+dir.x*L, sl.y+dir.y*L);
+      ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(e.x,e.y); ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // particles
   for(const p of particles){
-    const a=1-p.t/p.life;
-    ctx.fillStyle=p.col; ctx.globalAlpha=a;
-    ctx.fillRect(px(p.x)-1.5,px(p.y)-1.5,3,3);
+    const sp=iso(p.x,p.y), a=1-p.t/p.life;
+    ctx.globalAlpha=a; ctx.fillStyle=p.col;
+    ctx.fillRect(sp.x-1.5,sp.y-1.5,3,3);
   }
   ctx.globalAlpha=1;
 
-  // ศัตรู
-  for(const e of enemies){
-    const cx=px(e.x), cy=px(e.y), rr=px(e.sz);
-    // เงา
-    ctx.fillStyle="rgba(0,0,0,0.35)";
-    ctx.beginPath();ctx.ellipse(cx,cy+rr*0.7,rr*0.9,rr*0.4,0,0,7);ctx.fill();
-    // ตัว
-    ctx.fillStyle=e.hitFlash>0?"#fff":e.col;
-    if(e.kind==="brute"){ ctx.fillRect(cx-rr,cy-rr,rr*2,rr*2); }
-    else { ctx.beginPath();ctx.arc(cx,cy,rr,0,7);ctx.fill(); }
-    // หลอดเลือดศัตรู
-    const w=rr*2.2, hpf=e.hp/e.maxhp;
-    ctx.fillStyle="rgba(0,0,0,.6)";ctx.fillRect(cx-w/2,cy-rr-7,w,3.5);
-    ctx.fillStyle=hpf>0.4?"#f85149":"#ff9d5c";ctx.fillRect(cx-w/2,cy-rr-7,w*hpf,3.5);
-    // หลอด ATB ศัตรู (เส้นบาง)
-    ctx.fillStyle="rgba(227,179,65,.55)";ctx.fillRect(cx-w/2,cy-rr-3,w*Math.min(1,e.gauge/GAUGE_CAP),2);
-  }
+  // เรียงลำดับความลึก (วาดหลังสุดให้หน่วยที่อยู่ "ล่าง" ของจอ)
+  const now=performance.now();
+  const drawables=[];
+  for(const e of enemies) drawables.push({u:e, depth:e.x+e.y});
+  drawables.push({u:player, depth:player.x+player.y});
+  drawables.sort((a,b)=>a.depth-b.depth);
 
-  // เอฟเฟกต์ท่า (slash)
-  for(const s of slashes){
-    const a=1-s.t/0.35;
-    const cx=px(s.x), cy=px(s.y);
-    ctx.globalAlpha=a;
-    ctx.strokeStyle=s.skill.color; ctx.fillStyle=s.skill.color;
-    ctx.lineWidth=3;
-    if(s.skill.shape==="radial"){
-      const R=px(s.skill.radius)*(0.5+s.t/0.35*0.6);
-      ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
-      ctx.globalAlpha=a*0.15;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fill();
-    } else if(s.skill.shape==="cross"){
-      const L=px(s.skill.length);
-      ctx.beginPath();ctx.moveTo(cx-L,cy);ctx.lineTo(cx+L,cy);
-      ctx.moveTo(cx,cy-L);ctx.lineTo(cx,cy+L);ctx.stroke();
-    } else { // line
-      const f=s.face, L=px(s.skill.length);
-      const dir=Math.abs(f.x)>Math.abs(f.y)?{x:Math.sign(f.x),y:0}:{x:0,y:Math.sign(f.y)||-1};
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+dir.x*L,cy+dir.y*L);ctx.stroke();
+  for(const d of drawables){
+    const u=d.u, sp=iso(u.x,u.y);
+    if(u.side==="player"){
+      drawFigure(sp.x,sp.y,44,player.faceX,player.moving,player.atkAnim,player.hitFlash>0,"hero",now);
+      // วงเรืองเมื่อหลอดเต็ม
+      if(player.gauge>=GAUGE_CAP){
+        ctx.strokeStyle="rgba(232,194,90,0.55)"; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.ellipse(sp.x,sp.y,15+Math.sin(now/120)*2,7.5,0,0,7); ctx.stroke();
+      }
+      drawBars(sp.x,sp.y-52,28,player.hp/player.maxhp,"#7ec96b",player.gauge/GAUGE_CAP);
+    } else {
+      drawFigure(sp.x,sp.y,u.H,u.faceX,u.moving,u.atkAnim,u.hitFlash>0,u.pal,now);
+      drawBars(sp.x,sp.y-(u.H+12),u.H*0.6,u.hp/u.maxhp,"#f85149",Math.min(1,u.gauge/GAUGE_CAP));
     }
-    ctx.globalAlpha=1;
   }
 
-  // ผู้เล่น (จอมยุทธ์กระบี่)
-  {
-    const cx=px(player.x), cy=px(player.y), rr=px(player.r);
-    ctx.fillStyle="rgba(0,0,0,0.4)";
-    ctx.beginPath();ctx.ellipse(cx,cy+rr*0.7,rr*0.9,rr*0.4,0,0,7);ctx.fill();
-    // วงเรืองรอบตัวเมื่อหลอดเต็ม
-    if(player.gauge>=GAUGE_CAP){
-      ctx.strokeStyle="rgba(227,179,65,0.6)";ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(cx,cy,rr+4+Math.sin(Date.now()/120)*2,0,7);ctx.stroke();
-    }
-    ctx.fillStyle=player.hitFlash>0?"#fff":"#cfe3ff";
-    ctx.beginPath();ctx.arc(cx,cy,rr,0,7);ctx.fill();
-    ctx.strokeStyle="#58a6ff";ctx.lineWidth=2;ctx.stroke();
-    // กระบี่ชี้ตามทิศหน้า
-    ctx.strokeStyle="#e6edf3";ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(cx,cy);
-    ctx.lineTo(cx+player.face.x*rr*2.0, cy+player.face.y*rr*2.0);ctx.stroke();
-  }
-
-  // floating damage text (docs/11 §8)
+  // floating damage text (docs/11 §8) — วาดบนสุด
   for(const f of floats){
     if(f.t<f.delay) continue;
-    const a=clamp(1.2-f.t,0,1);
+    const sp=iso(f.x+f.jitter,f.y), a=clamp(1.2-f.t,0,1);
+    const rise=f.t*26;
     ctx.globalAlpha=a; ctx.textAlign="center";
-    let col="#e6edf3", size=15, txt=f.txt;
-    if(f.kind==="crit"){col="#ffd166";size=23;}
+    let col="#f3e9d2", size=15;
+    if(f.kind==="crit"){col="#ffd166";size=24;}
     else if(f.kind==="enemyhit"){col="#f85149";size=16;}
-    else if(f.kind==="miss"){col="#8b949e";size=13;}
-    else if(f.kind==="wave"){col="#58a6ff";size=20;}
-    else if(f.kind==="total"){col="#e3b341";size=18;}
+    else if(f.kind==="miss"){col="#b9a988";size=13;}
+    else if(f.kind==="wave"){col="#7fb4ff";size=20;}
+    else if(f.kind==="total"){col="#e8c25a";size=18;}
     ctx.font=`bold ${size}px "Segoe UI",sans-serif`;
-    ctx.fillStyle="rgba(0,0,0,.6)";
-    ctx.fillText(txt,px(f.x+f.jitter)+1,px(f.y)+1);
-    ctx.fillStyle=col;
-    ctx.fillText(txt,px(f.x+f.jitter),px(f.y));
+    ctx.fillStyle="rgba(0,0,0,.65)"; ctx.fillText(f.txt,sp.x+1,sp.y-rise+1);
+    ctx.fillStyle=col; ctx.fillText(f.txt,sp.x,sp.y-rise);
     ctx.globalAlpha=1;
   }
+
   ctx.restore();
+  // vignette
+  const vg=ctx.createRadialGradient(CW/2,CH/2,CH*0.3,CW/2,CH/2,CH*0.75);
+  vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.45)");
+  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,CH);
+}
+function drawBars(cx,cy,w,hpf,hpcol,gaugef){
+  ctx.fillStyle="rgba(0,0,0,.6)"; ctx.fillRect(cx-w/2,cy,w,4);
+  ctx.fillStyle=hpcol; ctx.fillRect(cx-w/2,cy,w*clamp(hpf,0,1),4);
+  ctx.fillStyle="rgba(0,0,0,.5)"; ctx.fillRect(cx-w/2,cy+5,w,2);
+  ctx.fillStyle="rgba(232,194,90,.7)"; ctx.fillRect(cx-w/2,cy+5,w*clamp(gaugef,0,1),2);
 }
 
 // ====================== HUD ======================
@@ -502,50 +611,33 @@ function updateSkillBtns(){
 // ====================== main loop ======================
 function frame(ts){
   if(!last) last=ts;
-  let dt=(ts-last)/1000; last=ts;
-  if(dt>0.25) dt=0.25;
-  if(running){
-    acc+=dt;
-    while(acc>=DT){ step(); acc-=DT; }
-  }
-  draw();
-  updateSkillBtns();
+  let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25;
+  if(running){ acc+=dt; while(acc>=DT){ step(); acc-=DT; } }
+  draw(); updateSkillBtns();
   requestAnimationFrame(frame);
 }
 
 // ====================== input ======================
-function canvasToGrid(clientX,clientY){
-  const r=cv.getBoundingClientRect();
-  const x=(clientX-r.left)/r.width*GRID;
-  const y=(clientY-r.top)/r.height*GRID;
-  return {x:clamp(x,0,GRID),y:clamp(y,0,GRID)};
-}
 function onPoint(clientX,clientY){
   if(!running) return;
-  player.moveTo=canvasToGrid(clientX,clientY);
+  const r=cv.getBoundingClientRect();
+  const sx=(clientX-r.left)/r.width*CW, sy=(clientY-r.top)/r.height*CH;
+  const g=unIso(sx,sy);
+  player.moveTo={x:clamp(g.x,0.4,GRID-0.4),y:clamp(g.y,0.4,GRID-0.4)};
 }
 cv.addEventListener("mousedown",e=>onPoint(e.clientX,e.clientY));
 cv.addEventListener("mousemove",e=>{if(e.buttons&1)onPoint(e.clientX,e.clientY);});
 cv.addEventListener("touchstart",e=>{e.preventDefault();const t=e.touches[0];onPoint(t.clientX,t.clientY);},{passive:false});
 cv.addEventListener("touchmove",e=>{e.preventDefault();const t=e.touches[0];onPoint(t.clientX,t.clientY);},{passive:false});
-
 window.addEventListener("keydown",e=>{
-  if(e.key==="1") castSkill(0);
-  else if(e.key==="2") castSkill(1);
-  else if(e.key==="3") castSkill(2);
+  if(e.key==="1") castSkill(0); else if(e.key==="2") castSkill(1); else if(e.key==="3") castSkill(2);
 });
-document.querySelectorAll(".skill").forEach(el=>{
-  el.addEventListener("click",()=>castSkill(+el.dataset.i));
-});
+document.querySelectorAll(".skill").forEach(el=>el.addEventListener("click",()=>castSkill(+el.dataset.i)));
 
-// start / restart
-function start(){
-  document.getElementById("banner").classList.add("hide");
-  reset(); running=true;
-}
+function start(){ document.getElementById("banner").classList.add("hide"); reset(); running=true; }
 document.getElementById("banner").addEventListener("click",start);
 
-reset(); running=false;
+buildBackground(); reset(); running=false;
 requestAnimationFrame(frame);
 </script>
 </body>
