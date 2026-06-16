@@ -61,15 +61,16 @@
     <span>ลมปราณ <b id="mpv" style="color:var(--mp)">—</b></span>
     <span>คลื่น <b id="wavev" class="tag">1</b></span>
     <span>สังหาร <b id="killv" class="tag">0</b></span>
-    <span style="color:var(--dim)">แตะพื้น = เดิน · 一二三 / ปุ่ม = ออกท่า</span>
+    <span style="color:var(--dim)">แตะพื้น = เดิน (กินหลอด) · 一二三 / ปุ่ม = ออกท่า · ทุก action ต้องรอหลอดเต็ม</span>
   </div>
   <div id="stage">
     <canvas id="cv"></canvas>
     <div id="banner">
       <h1>ยุทธภพชางหลาน</h1>
       <div class="sub">蒼 瀾 江 湖</div>
-      <p>ยืนกลางวงล้อม สะบัดกระบี่ท่าเดียวกระจายศัตรูทั้งวง — เดินจัดตำแหน่งให้ศัตรูกระจุกเข้ารัศมี
-      แล้วปล่อยท่า AoE ทีเดียว หลอดพลัง (ATB) เติมตามเวลาจริง เต็มเมื่อไรจึงออกท่าได้</p>
+      <p>ยืนกลางวงล้อม สะบัดกระบี่ท่าเดียวกระจายศัตรูทั้งวง — หลอดพลัง (ATB) เติมตามเวลาจริง
+      <b style="color:var(--ink)">ทุกการกระทำ ทั้ง "เดิน" และ "ออกท่า" นับเป็น 1 action กินหลอดเต็ม</b>
+      ต้องรอหลอดเต็มจึงสั่งได้ — วางจังหวะเดิน/ตีให้ดีแบบ SRPG</p>
       <p style="color:var(--gold)">แตะพื้นเพื่อเดิน · 一 กระบี่ปาดแนว · 二 กากบาทเมฆ · 三 วงล้อมเมฆพิฆาต (ท่าไม้ตาย)</p>
       <div class="go">แตะเพื่อเริ่ม</div>
     </div>
@@ -145,7 +146,7 @@ function makePlayer(){
     hp:520, maxhp:520, mp:120, maxmp:120,
     atk:62, def:24, acc:90, eva:35, crit:0.28,
     agi:120, SPD:120*2+0.3*60, gauge:GAUGE_CAP, haste:1,
-    moveTo:null, face:{x:1,y:0}, faceX:1, castLock:0, hitFlash:0, atkAnim:0,
+    moveTo:null, queuedMove:null, face:{x:1,y:0}, faceX:1, castLock:0, hitFlash:0, atkAnim:0,
   };
 }
 let UID=1;
@@ -206,11 +207,18 @@ function shapeCells(skill,facing){
 }
 
 // ====================== ปล่อยท่า (docs/11 §7, docs/12) ======================
+let lastNotReady=0;
+function notReady(msg){
+  const now=performance.now();
+  if(now-lastNotReady>500){ lastNotReady=now; addFloat(player.x,player.y-0.6,msg,"miss"); }
+}
 function castSkill(idx){
   if(!running||gameover) return;
   const s=SKILLS[idx];
-  if(player.gauge<s.gaugeCost) return;
-  if(player.mp<s.mp){ addFloat(player.x,player.y-0.6,"ลมปราณไม่พอ","miss"); return; }
+  if(player.castLock>0) return;
+  if(player.gauge<s.gaugeCost){ notReady("หลอดยังไม่เต็ม"); return; }
+  if(player.mp<s.mp){ notReady("ลมปราณไม่พอ"); return; }
+  player.queuedMove=null;            // ออกท่า = ยกเลิกคำสั่งเดินที่ค้างไว้
   player.mp-=s.mp; player.gauge-=s.gaugeCost; player.castLock=s.cast; player.atkAnim=1;
 
   let targets=[];
@@ -255,15 +263,22 @@ function spawnSpark(x,y,col){
 // ====================== AI ศัตรู (docs/11 §9) ======================
 function enemyAI(e){
   const d=dist(e,player);
-  if(d>e.atkRange){
-    const a=Math.atan2(player.y-e.y,player.x-e.x);
+  // กำลังเดินตามคำสั่งที่ commit ไว้ (จ่ายหลอดไปแล้ว 1 action) — เดินจนถึงระยะ/จุดหมาย
+  if(e.moveTo){
+    e.faceX=(player.x-e.x)>=0?1:-1;
+    if(d<=e.atkRange){ e.moveTo=null; e.moving=false; return; }
+    const a=Math.atan2(e.moveTo.y-e.y,e.moveTo.x-e.x);
     const sp=moveSpeed(e)*DT;
     e.x=clamp(e.x+Math.cos(a)*sp,0.4,GRID-0.4);
     e.y=clamp(e.y+Math.sin(a)*sp,0.4,GRID-0.4);
-    e.faceX = (player.x-e.x)>=0?1:-1; e.moving=true;
-  } else {
-    e.moving=false; e.faceX=(player.x-e.x)>=0?1:-1;
-    if(e.gauge>=GAUGE_CAP && e.castLock<=0){
+    e.moving=true;
+    if(dist(e,e.moveTo)<0.15) e.moveTo=null;
+    return;
+  }
+  e.moving=false; e.faceX=(player.x-e.x)>=0?1:-1;
+  // ตัดสิน action ใหม่เมื่อหลอดเต็มเท่านั้น — ทั้ง "ตี" และ "เดิน" นับเป็น action กินหลอดเต็ม
+  if(e.gauge>=GAUGE_CAP && e.castLock<=0){
+    if(d<=e.atkRange){
       e.gauge-=GAUGE_CAP; e.castLock=0.3; e.atkAnim=1;
       if(rollHit(e,player)){
         const crit=rollCrit(e), dmg=damage(e,player,e.dmgMult,crit);
@@ -272,6 +287,9 @@ function enemyAI(e){
         if(player.hp<=0){ player.hp=0; endGame(false); }
         updateHud();
       } else addFloat(player.x,player.y-0.4,"หลบ","miss");
+    } else {
+      e.gauge-=GAUGE_CAP;                  // เดิน = 1 action เต็มหลอด
+      e.moveTo={x:player.x,y:player.y};    // มุ่งเข้าหาตำแหน่งผู้เล่น ณ ขณะ commit
     }
   }
 }
@@ -289,6 +307,13 @@ function separate(){
 
 // ====================== ลูปจำลอง (docs/11 §4) ======================
 function step(){
+  // เดิน = 1 action กินหลอดเต็ม — สั่งเดินใหม่ได้เมื่อหลอดเต็มเท่านั้น
+  // (แตะตอนหลอดยังไม่เต็มจะถูก "จองคำสั่ง" ไว้ แล้วยิงอัตโนมัติเมื่อพร้อม)
+  if(player.queuedMove && player.gauge>=GAUGE_CAP && player.castLock<=0){
+    player.gauge-=GAUGE_CAP;
+    player.moveTo={...player.queuedMove};
+    player.queuedMove=null;
+  }
   if(player.moveTo){
     const a=Math.atan2(player.moveTo.y-player.y,player.moveTo.x-player.x);
     const sp=moveSpeed(player)*DT*(player.castLock>0?0.3:1);
@@ -491,7 +516,15 @@ function draw(){
 
   drawFloor();
 
-  // จุดหมายเดิน (วงบนพื้น iso)
+  // คำสั่งเดินที่ "จองไว้" รอหลอดเต็ม (วงประจางๆ)
+  if(player.queuedMove){
+    const q=iso(player.queuedMove.x,player.queuedMove.y);
+    ctx.strokeStyle="rgba(232,194,90,0.28)"; ctx.lineWidth=1.5;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.ellipse(q.x,q.y,11,5.5,0,0,7); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // จุดหมายเดินปัจจุบัน (commit แล้ว — วงทึบ)
   if(player.moveTo){
     const p=iso(player.moveTo.x,player.moveTo.y);
     ctx.strokeStyle="rgba(232,194,90,0.6)"; ctx.lineWidth=2;
@@ -623,7 +656,8 @@ function onPoint(clientX,clientY){
   const r=cv.getBoundingClientRect();
   const sx=(clientX-r.left)/r.width*CW, sy=(clientY-r.top)/r.height*CH;
   const g=unIso(sx,sy);
-  player.moveTo={x:clamp(g.x,0.4,GRID-0.4),y:clamp(g.y,0.4,GRID-0.4)};
+  // จองคำสั่งเดิน — จะ commit (กินหลอดเต็ม) เมื่อหลอดพร้อมใน step()
+  player.queuedMove={x:clamp(g.x,0.4,GRID-0.4),y:clamp(g.y,0.4,GRID-0.4)};
 }
 cv.addEventListener("mousedown",e=>onPoint(e.clientX,e.clientY));
 cv.addEventListener("mousemove",e=>{if(e.buttons&1)onPoint(e.clientX,e.clientY);});
