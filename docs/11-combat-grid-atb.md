@@ -117,7 +117,7 @@ def fill_per_sec(unit):
 unit.gauge = min(OVERFLOW_CAP, unit.gauge + fill_per_sec(unit) * dt)
 unit.ready = unit.gauge >= GAUGE_CAP
 ```
-**ตารางจังหวะตาม SPD** (SPD = AGI*2 + FOC*0.5, ดู docs/01 §3):
+**ตารางจังหวะตาม SPD** (SPD = ปฏิภาณ*2 + ความกล้า*0.3, ดู docs/15 §2):
 | SPD | charge | actions/นาที | ช่วงตัวละคร |
 |---|---|---|---|
 | 12.5 | 2.67s | ~22 | เริ่มเกม |
@@ -144,9 +144,9 @@ unit.ready = unit.gauge >= GAUGE_CAP
 ```python
 BASE_MOVE = 2.0          # tiles/sec ฐาน
 def move_speed(unit):
-    return clamp(BASE_MOVE * (1 + unit.AGI/120), 1.5, 6.0)   # tiles/sec
+    return clamp(BASE_MOVE * (1 + unit.ปฏิภาณ/120), 1.5, 6.0)   # tiles/sec
 ```
-| AGI | ความเร็ว (tiles/s) |
+| ปฏิภาณ | ความเร็ว (tiles/s) |
 |---|---|
 | 5 | 2.08 |
 | 40 | 2.67 |
@@ -249,7 +249,7 @@ DamageEvent = { target_id, amount, kind, world_pos, tick }
 ## 10. การใช้สูตร/ค่าร่วมกับเกมหลัก (Consistency)
 ใช้ของเดิมทั้งหมด ไม่สร้างเลขใหม่ซ้อน:
 - **ค่าสถานะ & สูตรดาเมจ/hit/crit/สถานะ:** docs/01 §3–4 และ §7 (status)
-- **SPD** ขับ Action Gauge, **AGI** ขับความเร็วเดิน (ทั้งคู่จากค่าพื้นฐานเดิม)
+- **SPD** ขับ Action Gauge, **ปฏิภาณ** ขับความเร็วเดิน (ทั้งคู่จากค่าพื้นฐานเดิม)
 - **วิชา/ระดับ/MP/ความชำนาญ:** docs/02 (เพิ่มแค่ field เชิงพื้นที่: shape/radius/max_targets)
 - **EXP/ชื่อเสียง/PI/drop:** docs/03, 08 ใช้ได้ทันที (โหมดนี้แค่เปลี่ยน "วิธีตี")
 

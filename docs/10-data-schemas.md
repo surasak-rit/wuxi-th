@@ -36,7 +36,7 @@
     "100": "supreme_passive"         // เฉพาะ grade=supreme
   },
   "requirements": {                  // ปลดล็อกเรียน — ไม่อิงเลเวลตัวละคร (docs/02 §1)
-    "attributes": { "STR": 8 },
+    "attributes": { "arm": 8 },
     "comprehension": 8,
     "fame": 1,
     "sect": "cloud_peak",
@@ -99,7 +99,7 @@
     "elem_power": 0,                // ค่าโจมตีพิเศษธาตุ
     "proc_chance": 0.0
   },
-  "requirements": { "attributes": { "STR": 30 }, "fame": 2 }
+  "requirements": { "attributes": { "arm": 30 }, "fame": 2 }
 }
 ```
 
@@ -122,7 +122,7 @@
   "id": "player_uuid",
   "name": "เย่หลิง",
   "sect": "cloud_peak",
-  "attributes": { "STR": 22, "INT": 10, "AGI": 18, "FOC": 14, "COM": 40 },
+  "attributes": { "arm": 22, "bone": 16, "agi": 18, "courage": 12, "comprehension": 40, "recovery": 10, "fortune": 8 },  // 7 ค่าแบบ JY (docs/15)
   "combat_exp": 1820,               // สกุลเงินฝึกวิชา (มีเพดานตาม fame)
   "fame_level": 3,
   "karma": 0,
