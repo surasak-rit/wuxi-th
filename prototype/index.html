@@ -28,7 +28,26 @@
     box-shadow:0 14px 50px rgba(0,0,0,.65), inset 0 0 0 2px rgba(232,194,90,.12);
     touch-action:none;background:#0a0703;}
   canvas{display:block;}
-  #skills{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
+  #atb{width:360px;max-width:92vw;height:13px;border:1px solid #6e4a1e;border-radius:7px;
+    background:#160d04;position:relative;overflow:hidden;}
+  #atbfill{position:absolute;left:0;top:0;height:100%;width:0;
+    background:linear-gradient(90deg,#7a5a1a,#e8c25a);}
+  #atbtxt{position:absolute;inset:0;text-align:center;font-size:10px;line-height:13px;
+    color:rgba(243,233,210,.8);letter-spacing:2px;}
+  #atb.ready{box-shadow:0 0 14px rgba(232,194,90,.6);}
+  #atb.ready #atbfill{background:linear-gradient(90deg,#e8c25a,#fff2cc);}
+  #cmdbar{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
+  .cmd{min-width:74px;padding:7px 6px;border:1px solid #6e4a1e;border-radius:8px;cursor:pointer;
+    background:linear-gradient(#2a1a0c,#160d04);color:var(--ink);font-family:inherit;
+    font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;
+    user-select:none;transition:transform .05s;}
+  .cmd b{font-size:17px;color:var(--gold);opacity:.78;line-height:1;}
+  .cmd:active{transform:scale(.94);}
+  .cmd.active{border-color:var(--jade);box-shadow:0 0 10px rgba(95,191,155,.4);}
+  .cmd.active b{color:var(--jade);opacity:1;}
+  .cmd.ready{border-color:var(--gold);}
+  .cmd.disabled{opacity:.38;}
+  #arts{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;}
   .skill{position:relative;width:100px;height:64px;border:1px solid #6e4a1e;
     border-radius:8px;cursor:pointer;overflow:hidden;user-select:none;
     background:linear-gradient(#241608,#160d04);
@@ -61,7 +80,7 @@
     <span>ลมปราณ <b id="mpv" style="color:var(--mp)">—</b></span>
     <span>คลื่น <b id="wavev" class="tag">1</b></span>
     <span>สังหาร <b id="killv" class="tag">0</b></span>
-    <span style="color:var(--dim)">แตะพื้น = เดิน (กินหลอด) · 一二三 / ปุ่ม = ออกท่า · ทุก action ต้องรอหลอดเต็ม</span>
+    <span style="color:var(--dim)">เลือกคำสั่งด้านล่าง → แตะช่องเป้าหมาย · ทุก action กินหลอด ATB เต็ม</span>
   </div>
   <div id="stage">
     <canvas id="cv"></canvas>
@@ -75,10 +94,19 @@
       <div class="go">แตะเพื่อเริ่ม</div>
     </div>
   </div>
-  <div id="skills">
+  <div id="atb"><div id="atbfill"></div><span id="atbtxt">หลอดพลัง ATB</span></div>
+  <div id="arts" class="hide">
     <div class="skill" data-i="0"><span class="cnk">一</span><div class="fill"></div><span class="nm">กระบี่<br>ปาดแนว</span></div>
     <div class="skill" data-i="1"><span class="cnk">二</span><div class="fill"></div><span class="nm">กากบาท<br>เมฆ</span></div>
     <div class="skill" data-i="2"><span class="cnk">三</span><div class="fill"></div><span class="nm">วงล้อม<br>เมฆพิฆาต</span></div>
+  </div>
+  <div id="cmdbar">
+    <button class="cmd mode active" data-mode="move"><b>移</b>เดิน</button>
+    <button class="cmd mode" data-mode="attack"><b>攻</b>โจมตี</button>
+    <button class="cmd mode" data-mode="jump"><b>輕</b>ตัวเบา</button>
+    <button class="cmd" id="btnArts"><b>武</b>วิทยายุทธ์</button>
+    <button class="cmd mode" data-mode="hidden"><b>暗</b>อาวุธลับ</button>
+    <button class="cmd" id="btnFlee"><b>遁</b>หนี</button>
   </div>
 </div>
 <script>
@@ -139,6 +167,13 @@ const SKILLS=[
     falloff:{inner:1.6, outerMult:0.7} },
 ];
 
+// ====================== คำสั่งต่อสู้พื้นฐาน (action menu สไตล์ JY) ======================
+const BASIC ={ mult:1.0,  color:"#f0ead6" };           // โจมตีธรรมดา (ไม่ใช้ลมปราณ) เลือกช่อง 3×3
+const HIDDEN={ mult:0.95, mp:5, color:"#cfd6de" };     // อาวุธลับ — ระยะไกล
+const ATTACK_RANGE=1, JUMP_RANGE=5, HIDDEN_RANGE=6;    // ระยะ (Chebyshev เป็นช่อง)
+const ESCAPES=[{x:8,y:0.45},{x:8,y:15.55}];            // จุดหนี (มีสัญลักษณ์ 遁)
+let mode="move", pending=null, hover=null;
+
 // ====================== หน่วยรบ ======================
 function makePlayer(){
   return {
@@ -161,7 +196,7 @@ function makeEnemy(kind,x,y){
 }
 
 // ====================== สถานะเกม ======================
-let player, enemies, floats, slashes, particles, wave, kills, acc=0, last=0, running=false, gameover=false, screenShake=0;
+let player, enemies, floats, slashes, particles, projectiles, wave, kills, acc=0, last=0, running=false, gameover=false, screenShake=0;
 
 function spawnWave(n){
   const ring=[]; const count = 5 + n*2;
@@ -177,7 +212,10 @@ function spawnWave(n){
 }
 function reset(){
   player=makePlayer(); enemies=spawnWave(1);
-  floats=[]; slashes=[]; particles=[]; wave=1; kills=0; gameover=false;
+  floats=[]; slashes=[]; particles=[]; projectiles=[]; wave=1; kills=0; gameover=false;
+  mode="move"; pending=null; hover=null;
+  document.getElementById("arts").classList.add("hide");
+  document.querySelectorAll(".cmd.mode").forEach(b=>b.classList.toggle("active",b.dataset.mode==="move"));
   updateHud();
 }
 
@@ -210,17 +248,76 @@ function shapeCells(skill,facing){
 let lastNotReady=0;
 function notReady(msg){
   const now=performance.now();
-  if(now-lastNotReady>500){ lastNotReady=now; addFloat(player.x,player.y-0.6,msg,"miss"); }
+  if(now-lastNotReady>450){ lastNotReady=now; addFloat(player.x,player.y-0.6,msg,"miss"); }
 }
-function castSkill(idx){
-  if(!running||gameover) return;
-  const s=SKILLS[idx];
-  if(player.castLock>0) return;
-  if(player.gauge<s.gaugeCost){ notReady("หลอดยังไม่เต็ม"); return; }
-  if(player.mp<s.mp){ notReady("ลมปราณไม่พอ"); return; }
-  player.queuedMove=null;            // ออกท่า = ยกเลิกคำสั่งเดินที่ค้างไว้
-  player.mp-=s.mp; player.gauge-=s.gaugeCost; player.castLock=s.cast; player.atkAnim=1;
+const cellOf=u=>({x:Math.floor(u.x),y:Math.floor(u.y)});
+function nearEscape(){ return ESCAPES.some(e=>dist(player,e)<=1.7); }
+function actionReady(){ return player.gauge>=GAUGE_CAP && player.castLock<=0; }
 
+// ---- ขอทำ action: ทำทันทีถ้าหลอดเต็ม, ไม่งั้น "จองไว้" ทำเมื่อหลอดเต็ม (ทุก action กินหลอดเต็ม) ----
+function requestAction(a){
+  if(!running||gameover) return;
+  if(!validateAction(a,true)) return;
+  if(actionReady()) executeAction(a);
+  else pending=a;
+}
+function validateAction(a,feedback){
+  if(a.type==="attack" || a.type==="jump" || a.type==="hidden"){
+    const pc=cellOf(player), tc={x:Math.floor(a.gx),y:Math.floor(a.gy)};
+    const d=Math.max(Math.abs(pc.x-tc.x),Math.abs(pc.y-tc.y));
+    const R=a.type==="attack"?ATTACK_RANGE:a.type==="jump"?JUMP_RANGE:HIDDEN_RANGE;
+    if(d>R || d===0 && a.type==="jump"){ if(feedback) notReady("นอกระยะ"); return false; }
+  } else if(a.type==="hidden"){
+  } else if(a.type==="flee"){
+    if(!nearEscape()){ if(feedback) notReady("ต้องอยู่ใกล้ทางหนี 遁"); return false; }
+  } else if(a.type==="skill"){
+    if(player.mp<SKILLS[a.idx].mp){ if(feedback) notReady("ลมปราณไม่พอ"); return false; }
+  }
+  return true;
+}
+function executeAction(a){
+  player.gauge-=GAUGE_CAP; player.queuedMove=null; player.castLock=0.15;
+  if(a.type==="move"){ player.moveTo={x:a.gx,y:a.gy}; }
+  else if(a.type==="jump"){
+    player.moveTo=null;
+    player.jumpAnim={x0:player.x,y0:player.y,x1:a.gx,y1:a.gy,t:0,dur:0.30};
+    player.faceX=(a.gx-player.x)>=0?1:-1;
+    for(let k=0;k<8;k++) spawnSpark(player.x,player.y,"#cfe3ff");
+  }
+  else if(a.type==="attack"){ doBasic(a); }
+  else if(a.type==="hidden"){ doHidden(a); }
+  else if(a.type==="skill"){ player.castLock=SKILLS[a.idx].cast; doSkill(a.idx); }
+  else if(a.type==="flee"){ doFlee(); }
+}
+
+// ---- โจมตีธรรมดา: เลือกช่องในรัศมี 1 (3×3) ฟันเข้าช่องนั้น (ไม่ใช้ลมปราณ) ----
+function doBasic(a){
+  player.atkAnim=1; screenShake=3;
+  player.faceX=(a.gx-player.x)>=0?1:-1;
+  player.face={x:Math.sign(a.gx-player.x)||player.faceX,y:Math.sign(a.gy-player.y)||0};
+  slashes.push({skill:{shape:"basic",color:BASIC.color},face:{...player.face},t:0,x:a.gx,y:a.gy});
+  let total=0,n=0;
+  for(const e of enemies){
+    if(e.hp<=0 || dist(e,{x:a.gx,y:a.gy})>0.85) continue;
+    if(!rollHit(player,e)){ addFloat(e.x,e.y,"พลาด","miss"); continue; }
+    const crit=rollCrit(player), dmg=damage(player,e,BASIC.mult,crit);
+    e.hp-=dmg; e.hitFlash=0.18; total+=dmg; n++;
+    addFloat(e.x,e.y-0.4,dmg,crit?"crit":"normal");
+    for(let p=0;p<5;p++) spawnSpark(e.x,e.y,BASIC.color);
+  }
+  addTotal(total,n); updateHud();
+}
+// ---- อาวุธลับ: ปาเป้าระยะไกล (โพรเจกไทล์) ----
+function doHidden(a){
+  player.mp-=HIDDEN.mp; player.atkAnim=1;
+  player.faceX=(a.gx-player.x)>=0?1:-1;
+  projectiles.push({x:player.x,y:player.y,tx:a.gx,ty:a.gy,t:0,dur:0.20,done:false});
+  updateHud();
+}
+// ---- วิทยายุทธ์: ใช้วิชา AoE ตามทรง (docs/12) ----
+function doSkill(idx){
+  const s=SKILLS[idx];
+  player.mp-=s.mp; player.atkAnim=1;
   let targets=[];
   if(s.shape==="radial"){
     targets=enemies.filter(e=>e.hp>0 && gridDist(player,e)<=s.radius);
@@ -234,25 +331,29 @@ function castSkill(idx){
   }
   targets.sort((a,b)=>dist(player,a)-dist(player,b));
   targets=targets.slice(0,s.maxTargets);
-
   slashes.push({skill:s, face:{...player.face}, t:0, x:player.x, y:player.y});
   screenShake = s.shape==="radial"?7:3;
-
   let total=0, hitN=0;
   for(const t of targets){
     if(!rollHit(player,t)){ addFloat(t.x,t.y,"พลาด","miss"); continue; }
     let mult=s.mult;
     if(s.falloff && gridDist(player,t)>s.falloff.inner) mult*=s.falloff.outerMult;
-    const crit=rollCrit(player);
-    const dmg=damage(player,t,mult,crit);
+    const crit=rollCrit(player), dmg=damage(player,t,mult,crit);
     t.hp-=dmg; t.hitFlash=0.18; total+=dmg; hitN++;
     addFloat(t.x,t.y-0.4,dmg,crit?"crit":"normal");
-    const a=Math.atan2(t.y-player.y,t.x-player.x);
-    t.x=clamp(t.x+Math.cos(a)*0.5,0.5,GRID-0.5);
-    t.y=clamp(t.y+Math.sin(a)*0.5,0.5,GRID-0.5);
+    const ang=Math.atan2(t.y-player.y,t.x-player.x);
+    t.x=clamp(t.x+Math.cos(ang)*0.5,0.5,GRID-0.5);
+    t.y=clamp(t.y+Math.sin(ang)*0.5,0.5,GRID-0.5);
     for(let p=0;p<6;p++) spawnSpark(t.x,t.y,s.color);
   }
   addTotal(total,hitN); updateHud();
+}
+function doFlee(){
+  gameover=true; running=false;
+  const b=document.getElementById("banner"); b.classList.remove("hide");
+  b.innerHTML=`<h1 style="color:var(--jade)">หนีรอด 遁</h1>`+
+    `<p>ถอยจากสมรภูมิ — รอดถึงคลื่น <b class="tag">${wave}</b> · สังหาร <b class="tag">${kills}</b> คน</p>`+
+    `<div class="go">แตะเพื่อเล่นใหม่</div>`;
 }
 
 function spawnSpark(x,y,col){
@@ -307,14 +408,19 @@ function separate(){
 
 // ====================== ลูปจำลอง (docs/11 §4) ======================
 function step(){
-  // เดิน = 1 action กินหลอดเต็ม — สั่งเดินใหม่ได้เมื่อหลอดเต็มเท่านั้น
-  // (แตะตอนหลอดยังไม่เต็มจะถูก "จองคำสั่ง" ไว้ แล้วยิงอัตโนมัติเมื่อพร้อม)
-  if(player.queuedMove && player.gauge>=GAUGE_CAP && player.castLock<=0){
-    player.gauge-=GAUGE_CAP;
-    player.moveTo={...player.queuedMove};
-    player.queuedMove=null;
+  // ทุก action กินหลอดเต็ม — ถ้ามี action ที่ "จองไว้" และหลอดเต็มแล้ว → ทำทันที
+  if(pending && actionReady()){
+    if(validateAction(pending,false)) executeAction(pending);
+    pending=null;
   }
-  if(player.moveTo){
+  // อนิเมชันตัวเบา (กระโดด) — เคลื่อนเป็นส่วนโค้ง ระหว่างนี้ไม่เดินปกติ
+  if(player.jumpAnim){
+    const j=player.jumpAnim; j.t+=DT; const p=Math.min(1,j.t/j.dur);
+    player.x=j.x0+(j.x1-j.x0)*p; player.y=j.y0+(j.y1-j.y0)*p;
+    player.hop=Math.sin(p*Math.PI)*18; player.moving=true;
+    if(p>=1){ player.hop=0; player.jumpAnim=null;
+      for(let k=0;k<8;k++) spawnSpark(player.x,player.y,"#cfe3ff"); }
+  } else if(player.moveTo){
     const a=Math.atan2(player.moveTo.y-player.y,player.moveTo.x-player.x);
     const sp=moveSpeed(player)*DT*(player.castLock>0?0.3:1);
     if(dist(player,player.moveTo)<0.08){ player.moveTo=null; player.moving=false; }
@@ -357,6 +463,23 @@ function step(){
   floats=floats.filter(f=>f.t<1.1);
   for(const s of slashes) s.t+=DT;
   slashes=slashes.filter(s=>s.t<0.4);
+  // อาวุธลับ: เมื่อโพรเจกไทล์ถึงเป้า → ลงดาเมจช่องนั้น
+  for(const pr of projectiles){
+    pr.t+=DT;
+    if(pr.t>=pr.dur && !pr.done){
+      pr.done=true; let n=0,total=0;
+      for(const e of enemies){
+        if(e.hp<=0 || dist(e,{x:pr.tx,y:pr.ty})>0.85) continue;
+        if(!rollHit(player,e)){ addFloat(e.x,e.y,"พลาด","miss"); continue; }
+        const crit=rollCrit(player), dmg=damage(player,e,HIDDEN.mult,crit);
+        e.hp-=dmg; e.hitFlash=0.18; total+=dmg; n++;
+        addFloat(e.x,e.y-0.4,dmg,crit?"crit":"normal");
+        for(let p=0;p<5;p++) spawnSpark(e.x,e.y,HIDDEN.color);
+      }
+      addTotal(total,n); updateHud();
+    }
+  }
+  projectiles=projectiles.filter(pr=>pr.t<pr.dur+0.06);
   for(const p of particles){ p.t+=DT; p.x+=p.vx*DT; p.y+=p.vy*DT; p.vx*=0.9; p.vy*=0.9; }
   particles=particles.filter(p=>p.t<p.life);
   if(screenShake>0) screenShake*=0.85;
@@ -419,6 +542,60 @@ function drawFloor(){
   const c0=iso(0,0), c1=iso(GRID,0), c2=iso(GRID,GRID), c3=iso(0,GRID);
   ctx.beginPath(); ctx.moveTo(c0.x,c0.y); ctx.lineTo(c1.x,c1.y);
   ctx.lineTo(c2.x,c2.y); ctx.lineTo(c3.x,c3.y); ctx.closePath(); ctx.stroke();
+}
+
+// ====================== ไฮไลต์เป้าหมายตามโหมดคำสั่ง ======================
+function fillCell(cx,cy,fill,stroke){
+  const t=iso(cx,cy), r=iso(cx+1,cy), b=iso(cx+1,cy+1), l=iso(cx,cy+1);
+  ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(r.x,r.y);
+  ctx.lineTo(b.x,b.y); ctx.lineTo(l.x,l.y); ctx.closePath();
+  if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+  if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=1.5; ctx.stroke(); }
+}
+function rangeDiamond(R){ // ขอบเขตระยะ (Chebyshev) รอบช่องผู้เล่น
+  const pc=cellOf(player);
+  const a=iso(pc.x-R,pc.y-R), b=iso(pc.x+R+1,pc.y-R),
+        c=iso(pc.x+R+1,pc.y+R+1), d=iso(pc.x-R,pc.y+R+1);
+  ctx.strokeStyle="rgba(95,191,155,0.45)"; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+  ctx.lineTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+}
+function drawTargeting(){
+  if(!running) return;
+  const pc=cellOf(player);
+  const hc = hover ? {x:Math.floor(hover.x),y:Math.floor(hover.y)} : null;
+  if(mode==="attack"){
+    for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++){
+      if(dx===0&&dy===0) continue;
+      const cx=pc.x+dx, cy=pc.y+dy;
+      if(cx<0||cy<0||cx>=GRID||cy>=GRID) continue;
+      const hovd = hc && hc.x===cx && hc.y===cy;
+      fillCell(cx,cy, hovd?"rgba(232,194,90,0.30)":"rgba(192,57,43,0.16)",
+               hovd?"rgba(232,194,90,0.8)":"rgba(192,57,43,0.4)");
+    }
+  } else if(mode==="jump" || mode==="hidden"){
+    const R = mode==="jump"?JUMP_RANGE:HIDDEN_RANGE;
+    rangeDiamond(R);
+    if(hc){
+      const d=Math.max(Math.abs(pc.x-hc.x),Math.abs(pc.y-hc.y));
+      const ok = d<=R && !(mode==="jump"&&d===0);
+      fillCell(hc.x,hc.y, ok?"rgba(95,191,155,0.30)":"rgba(192,57,43,0.25)",
+               ok?"rgba(95,191,155,0.9)":"rgba(192,57,43,0.7)");
+    }
+  } else if(mode==="move" && hc){
+    fillCell(hc.x,hc.y,"rgba(232,194,90,0.10)","rgba(232,194,90,0.3)");
+  }
+}
+function drawEscapes(){
+  const now=performance.now();
+  for(const e of ESCAPES){
+    const cx=Math.floor(e.x), cy=Math.floor(e.y);
+    const pulse=0.4+Math.abs(Math.sin(now/500))*0.4;
+    fillCell(cx,cy,`rgba(95,191,155,${0.12+pulse*0.12})`,`rgba(95,191,155,${pulse})`);
+    const c=iso(e.x,e.y);
+    ctx.fillStyle=`rgba(180,240,210,${0.7+pulse*0.3})`; ctx.textAlign="center";
+    ctx.font="bold 16px serif"; ctx.fillText("遁",c.x,c.y-6);
+  }
 }
 
 // ====================== sprite จอมยุทธ์ (วาดแบบ procedural) ======================
@@ -515,11 +692,13 @@ function draw(){
   if(screenShake>0.3) ctx.translate((Math.random()-0.5)*screenShake,(Math.random()-0.5)*screenShake);
 
   drawFloor();
+  drawEscapes();
+  drawTargeting();
 
-  // คำสั่งเดินที่ "จองไว้" รอหลอดเต็ม (วงประจางๆ)
-  if(player.queuedMove){
-    const q=iso(player.queuedMove.x,player.queuedMove.y);
-    ctx.strokeStyle="rgba(232,194,90,0.28)"; ctx.lineWidth=1.5;
+  // action ที่ "จองไว้" รอหลอดเต็ม (วงประจางๆ ที่เป้า)
+  if(pending && pending.gx!=null){
+    const q=iso(pending.gx,pending.gy);
+    ctx.strokeStyle="rgba(232,194,90,0.30)"; ctx.lineWidth=1.5;
     ctx.setLineDash([4,4]);
     ctx.beginPath(); ctx.ellipse(q.x,q.y,11,5.5,0,0,7); ctx.stroke();
     ctx.setLineDash([]);
@@ -543,7 +722,12 @@ function draw(){
     const a=clamp(1-sl.t/0.4,0,1), c=iso(sl.x,sl.y);
     ctx.save(); ctx.globalAlpha=a;
     ctx.strokeStyle=sl.skill.color; ctx.fillStyle=sl.skill.color; ctx.lineWidth=3;
-    if(sl.skill.shape==="radial"){
+    if(sl.skill.shape==="basic"){
+      // ฟันธรรมดา — เสี้ยวพระจันทร์ที่ช่องเป้า
+      const prog=sl.t/0.4;
+      ctx.lineWidth=3; ctx.beginPath();
+      ctx.ellipse(c.x,c.y,TILE_W*0.36,TILE_H*0.36,0,-0.6+prog*2.4,0.8+prog*2.4); ctx.stroke();
+    } else if(sl.skill.shape==="radial"){
       const prog=sl.t/0.4, R=sl.skill.radius*(0.4+prog*0.7);
       ctx.beginPath(); ctx.ellipse(c.x,c.y,R*TILE_W/2,R*TILE_H/2,0,0,7); ctx.stroke();
       ctx.globalAlpha=a*0.13; ctx.beginPath();
@@ -570,6 +754,16 @@ function draw(){
     ctx.fillRect(sp.x-1.5,sp.y-1.5,3,3);
   }
   ctx.globalAlpha=1;
+  // อาวุธลับที่กำลังพุ่ง (dart)
+  for(const pr of projectiles){
+    if(pr.done) continue;
+    const pp=pr.t/pr.dur;
+    const wx=pr.x+(pr.tx-pr.x)*pp, wy=pr.y+(pr.ty-pr.y)*pp;
+    const sp=iso(wx,wy), prev=iso(pr.x+(pr.tx-pr.x)*Math.max(0,pp-0.12),
+                                  pr.y+(pr.ty-pr.y)*Math.max(0,pp-0.12));
+    ctx.strokeStyle=HIDDEN.color; ctx.lineWidth=2; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(prev.x,prev.y-10); ctx.lineTo(sp.x,sp.y-10); ctx.stroke();
+  }
 
   // เรียงลำดับความลึก (วาดหลังสุดให้หน่วยที่อยู่ "ล่าง" ของจอ)
   const now=performance.now();
@@ -581,7 +775,7 @@ function draw(){
   for(const d of drawables){
     const u=d.u, sp=iso(u.x,u.y);
     if(u.side==="player"){
-      drawFigure(sp.x,sp.y,44,player.faceX,player.moving,player.atkAnim,player.hitFlash>0,"hero",now);
+      drawFigure(sp.x,sp.y-(player.hop||0),44,player.faceX,player.moving,player.atkAnim,player.hitFlash>0,"hero",now);
       // วงเรืองเมื่อหลอดเต็ม
       if(player.gauge>=GAUGE_CAP){
         ctx.strokeStyle="rgba(232,194,90,0.55)"; ctx.lineWidth=2;
@@ -632,12 +826,17 @@ function updateHud(){
   document.getElementById("wavev").textContent=wave;
   document.getElementById("killv").textContent=kills;
 }
-function updateSkillBtns(){
+function updateUI(){
+  const gready=actionReady();
+  const ab=document.getElementById("atb");
+  document.getElementById("atbfill").style.width=Math.min(100,player.gauge/GAUGE_CAP*100)+"%";
+  ab.classList.toggle("ready",gready);
+  document.querySelectorAll(".cmd").forEach(b=>b.classList.toggle("ready",gready));
+  document.getElementById("btnFlee").classList.toggle("disabled",!nearEscape());
   document.querySelectorAll(".skill").forEach(el=>{
     const s=SKILLS[+el.dataset.i];
-    const ready=player.gauge>=s.gaugeCost && player.mp>=s.mp;
-    el.classList.toggle("ready",ready);
-    el.querySelector(".fill").style.height=Math.min(100,player.gauge/s.gaugeCost*100)+"%";
+    el.classList.toggle("ready",gready && player.mp>=s.mp);
+    el.querySelector(".fill").style.height=Math.min(100,player.gauge/GAUGE_CAP*100)+"%";
   });
 }
 
@@ -646,27 +845,47 @@ function frame(ts){
   if(!last) last=ts;
   let dt=(ts-last)/1000; last=ts; if(dt>0.25) dt=0.25;
   if(running){ acc+=dt; while(acc>=DT){ step(); acc-=DT; } }
-  draw(); updateSkillBtns();
+  draw(); updateUI();
   requestAnimationFrame(frame);
 }
 
 // ====================== input ======================
-function onPoint(clientX,clientY){
-  if(!running) return;
+function screenToGrid(clientX,clientY){
   const r=cv.getBoundingClientRect();
   const sx=(clientX-r.left)/r.width*CW, sy=(clientY-r.top)/r.height*CH;
   const g=unIso(sx,sy);
-  // จองคำสั่งเดิน — จะ commit (กินหลอดเต็ม) เมื่อหลอดพร้อมใน step()
-  player.queuedMove={x:clamp(g.x,0.4,GRID-0.4),y:clamp(g.y,0.4,GRID-0.4)};
+  return {x:clamp(g.x,0,GRID-0.001),y:clamp(g.y,0,GRID-0.001)};
 }
-cv.addEventListener("mousedown",e=>onPoint(e.clientX,e.clientY));
-cv.addEventListener("mousemove",e=>{if(e.buttons&1)onPoint(e.clientX,e.clientY);});
-cv.addEventListener("touchstart",e=>{e.preventDefault();const t=e.touches[0];onPoint(t.clientX,t.clientY);},{passive:false});
-cv.addEventListener("touchmove",e=>{e.preventDefault();const t=e.touches[0];onPoint(t.clientX,t.clientY);},{passive:false});
-window.addEventListener("keydown",e=>{
-  if(e.key==="1") castSkill(0); else if(e.key==="2") castSkill(1); else if(e.key==="3") castSkill(2);
+function onTap(clientX,clientY){
+  if(!running||gameover) return;
+  const g=screenToGrid(clientX,clientY); hover=g;
+  if(mode==="move"){
+    requestAction({type:"move",gx:clamp(g.x,0.4,GRID-0.4),gy:clamp(g.y,0.4,GRID-0.4)});
+  } else { // attack / jump / hidden — สแน็ปเข้ากลางช่อง
+    requestAction({type:mode,gx:Math.floor(g.x)+0.5,gy:Math.floor(g.y)+0.5});
+  }
+}
+cv.addEventListener("mousedown",e=>onTap(e.clientX,e.clientY));
+cv.addEventListener("mousemove",e=>{ hover=screenToGrid(e.clientX,e.clientY); if(e.buttons&1) onTap(e.clientX,e.clientY); });
+cv.addEventListener("touchstart",e=>{e.preventDefault();const t=e.touches[0];onTap(t.clientX,t.clientY);},{passive:false});
+cv.addEventListener("touchmove",e=>{e.preventDefault();const t=e.touches[0];hover=screenToGrid(t.clientX,t.clientY);},{passive:false});
+
+// ปุ่มคำสั่งต่อสู้
+document.querySelectorAll(".cmd.mode").forEach(b=>b.addEventListener("click",()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll(".cmd.mode").forEach(x=>x.classList.toggle("active",x===b));
+  document.getElementById("arts").classList.add("hide");
+}));
+document.getElementById("btnArts").addEventListener("click",()=>{
+  document.getElementById("arts").classList.toggle("hide");
 });
-document.querySelectorAll(".skill").forEach(el=>el.addEventListener("click",()=>castSkill(+el.dataset.i)));
+document.getElementById("btnFlee").addEventListener("click",()=>requestAction({type:"flee"}));
+document.querySelectorAll(".skill").forEach(el=>el.addEventListener("click",()=>requestAction({type:"skill",idx:+el.dataset.i})));
+window.addEventListener("keydown",e=>{
+  if(e.key==="1") requestAction({type:"skill",idx:0});
+  else if(e.key==="2") requestAction({type:"skill",idx:1});
+  else if(e.key==="3") requestAction({type:"skill",idx:2});
+});
 
 function start(){ document.getElementById("banner").classList.add("hide"); reset(); running=true; }
 document.getElementById("banner").addEventListener("click",start);
