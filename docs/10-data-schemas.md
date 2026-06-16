@@ -19,8 +19,9 @@
   "max_level": 70,                  // ระดับสูงสุดตาม grade (สเกล 1–100)
   "targeting": "single",            // single|aoe|self|ally|all_allies
   "shape": { "type": "single" },    // ทรงพื้นที่ AoE → ดูเต็มใน docs/12-skill-shapes.md
-  "range": {                        // สูตรระยะฐานร่วมทุกวิชา (docs/12 §3.3) — ตั้งค่าต่อวิชา
-    "base_range": 2, "range_growth": 0.06, "range_cap_level": 100
+  "range": {                        // สูตรระยะฐานร่วมทุกวิชา (docs/12 §3.3) — growth/cap เท่ากันทั้งเกม
+    "base_range": 3,                // ชั้นระยะ: น้อย=2 / กลาง=3 / มาก=4 (ต่างกันแค่ ±1)
+    "range_growth": 0.04, "range_cap_level": 100
   },
   "effects": [
     { "kind": "damage" },
