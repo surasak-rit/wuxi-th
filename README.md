@@ -28,7 +28,8 @@ docs/
  ├─ 08-monsters-bosses.md   มอนสเตอร์ / บอส / PvE
  ├─ 09-systems-misc.md      ระบบเสริม + UX + สรุป core loop
  ├─ 10-data-schemas.md      Data schema + อภิธานศัพท์ (dev hand-off)
- └─ 11-combat-grid-atb.md   ระบบต่อสู้หลัก: กริดสี่เหลี่ยม + Real-time ATB + Radial AoE
+ ├─ 11-combat-grid-atb.md   ระบบต่อสู้หลัก: กริดสี่เหลี่ยม + Real-time ATB + Radial AoE
+ └─ 12-skill-shapes.md      รูปทรงพื้นที่โจมตี 6 แบบ + ขยายตามระดับวิชา
 ```
 
 ## สถานะ

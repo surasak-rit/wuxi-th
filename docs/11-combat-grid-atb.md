@@ -205,8 +205,10 @@ def resolve_radial(caster, skill):
     emit_batched(events)        # ⬅ ส่งทุก event พร้อมกัน → floating text simultaneous (§8)
     return events
 ```
-**ประเภท shape อื่น (ใช้ซ้ำ engine เดียว):** `line` (ทะลุแนว), `cone` (กรวยหน้า),
-`single` (เป้าเดียวแรง), `self` (บัฟ/ฟื้น) — ต่างกันที่ฟังก์ชันเลือกเป้า
+**ประเภท shape อื่น (ใช้ซ้ำ engine เดียว):** `line` (ทะลุแนว), `cross` (กากบาท), `star`
+(กากบาท+ทแยง), `plus5` (กากบาท 5 ช่อง), `pyramid` (5×5+สามเหลี่ยม), `radial` (วงกว้าง),
+`cone` (กรวยหน้า) — ต่างกันที่ฟังก์ชันเลือกเป้า; **รายละเอียดทรง AoE ทั้งหมด + แผนภาพ +
+การขยายตามระดับวิชา ดู [docs/12-skill-shapes.md](12-skill-shapes.md)**
 
 > **เหตุผล:** `max_targets` + `falloff` คุมทั้งสมดุล (ไม่ให้ AoE ล้างทุกอย่างไร้ขีดจำกัด)
 > และ performance (จำกัดงานต่อ frame); การ "ดึงศัตรูเข้า inner radius" ให้รางวัลดาเมจเต็ม

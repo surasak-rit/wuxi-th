@@ -21,6 +21,7 @@
 | 09 | [docs/09-systems-misc.md](docs/09-systems-misc.md) | นั่งสมาธิ, พาหนะ, อาจารย์-ศิษย์, อีเวนต์/ซีซัน, UX text-based, กันโกง |
 | 10 | [docs/10-data-schemas.md](docs/10-data-schemas.md) | Data schema (วิชา/ศัตรู/บอส/ไอเทม/เซฟ), stat pipeline, อภิธานศัพท์, open questions |
 | 11 | [docs/11-combat-grid-atb.md](docs/11-combat-grid-atb.md) | **ระบบต่อสู้หลัก:** กริดสี่เหลี่ยม (hex ออปชัน) + Real-time ATB + Radial AoE + floating damage |
+| 12 | [docs/12-skill-shapes.md](docs/12-skill-shapes.md) | รูปทรงพื้นที่โจมตี 6 แบบ (เส้น/กากบาท/ดาว/พีระมิด/วงกว้าง) + แผนภาพ + ขยายตามระดับวิชา |
 
 ---
 

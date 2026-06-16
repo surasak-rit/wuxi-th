@@ -18,6 +18,7 @@
   "mp_cost": 6,
   "max_star": 7,
   "targeting": "single",            // single|aoe|self|ally|all_allies
+  "shape": { "type": "single" },    // ทรงพื้นที่ AoE → ดูเต็มใน docs/12-skill-shapes.md
   "effects": [
     { "kind": "damage" },
     { "kind": "status", "status": null, "chance": 0.0, "duration": 0 },
