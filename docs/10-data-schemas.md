@@ -94,6 +94,11 @@
   "sockets": 1,
   "enhance_level": 0,               // +0..+10 (docs/05 §5)
   "element": "blade",
+  "elemental_imprint": {            // ตราธาตุจากช่างสายธาตุ (docs/14 §5.2) — null ถ้าไม่มี
+    "element": null,                // sun | star | moon
+    "elem_power": 0,                // ค่าโจมตีพิเศษธาตุ
+    "proc_chance": 0.0
+  },
   "requirements": { "attributes": { "STR": 30 }, "fame": 2 }
 }
 ```

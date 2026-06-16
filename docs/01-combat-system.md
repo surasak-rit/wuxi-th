@@ -142,6 +142,14 @@ def element_modifier(elem, target):
 > **เหตุผล:** ±10–15% พอให้การ "อ่านคู่ต่อสู้แล้วจัดวิชา" มีความหมาย แต่ไม่ทำให้ผู้เล่น
 > ที่บิลด์ผิดธาตุแพ้ขาด — สกิลการจัดทีม/ค่าพลังยังเป็นตัวหลัก
 
+**ค่าโจมตีพิเศษธาตุจากอุปกรณ์ (Elemental Imprint):** อาวุธ/ยุทโธปกรณ์ที่คราฟต์โดยช่างสายธาตุ
+(ตะวัน/ดารา/จันทรา — docs/14 §5.2) มีค่า `elem_power` เพิ่มดาเมจธาตุต่อครั้ง + proc เฉพาะธาตุ:
+```python
+elem_bonus = elem_power * element_modifier(weapon_element, target)   # บวกหลังดาเมจปกติ
+total_damage = damage + elem_bonus
+if roll() <= elem_proc_chance: apply_element_effect(target, weapon_element)  # เผา/เจาะ/ดูด-ดีบัฟ
+```
+
 ---
 
 ## 6. แผนการรบ (Battle Tactics / AI Script)
