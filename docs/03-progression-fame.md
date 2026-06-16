@@ -94,7 +94,7 @@ rested_pool += rest_rate * time_offline      # เพดาน rested = 1 วั
 ## 6. ดัชนีพลังรวม (Power Index, PI) — ใช้แทนเลเวลทั่วทั้งเกม
 ใช้ใน: คำนวณ EXP, จับคู่ PvP/ลีก, จัดระดับมอน/บอส, แสดง "ความแกร่ง" ของผู้เล่น
 ```python
-PI = sum(attributes)                 # สูงสุด 400 (4 ค่า x 100)
+PI = sum(attributes)                 # สูงสุด 700 (7 ค่าแบบ JY x 100 — docs/15)
    + sum(skill_level)               # active4+passive2 เต็ม Lv100 = 600 (วิชาสุดยอดถึง Lv200 ดู docs/02 §9)
    + gear_score                      # อุปกรณ์ (ดู docs/05)
    + fame_level * 5                  # 5..25
