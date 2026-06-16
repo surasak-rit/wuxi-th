@@ -19,7 +19,7 @@
 - ยังมี safety cap `max_targets` (docs/11 §7) กันเคสฝูงมหาศาลเพื่อ performance/สมดุล
 ```python
 def resolve_shape(caster, skill):
-    cells = build_offsets(skill.shape, level=skill.star)   # §3 scaling
+    cells = build_offsets(skill.shape, level=skill.level)  # §3 scaling (Lv1–100)
     cells = [rotate(o, skill.shape.orientation) for o in cells]
     world = [caster.cell + o for o in cells if in_bounds(caster.cell + o)]
     targets = [e for e in enemies_on(world) if e.alive][:skill.max_targets]
@@ -131,9 +131,8 @@ def resolve_shape(caster, skill):
 ## 3. การเปลี่ยนแปลงตามระดับวิชา (Level Progression)
 "ระดับวิชา" ส่งผลต่อทรงได้ **2 รูปแบบ** ใช้ร่วมกันได้:
 
-> 📌 **เรื่องสเกลระดับ:** กลไกนี้ใช้ "ระดับวิชา 1–100" ตามที่ออกแบบ — ใน docs/02 แสดงความ
-> ชำนาญเป็น "ดาว ★" ได้โดยจับคู่ **1 ดาว = 10 ระดับ** (★1=Lv1–10 … ★10=Lv91–100)
-> threshold ทั้งหมดด้านล่างตั้งค่าได้อิสระต่อวิชา
+> 📌 **สเกลหลัก = ระดับวิชา 1–100** (สอดคล้อง docs/02). หาก UI อยากแสดงเป็นดาวประดับ
+> ใช้ 1 ดาว = 10 ระดับ ได้ แต่ค่าจริงในระบบคือ Lv. threshold ด้านล่างตั้งค่าได้อิสระต่อวิชา
 
 ### 3.1 เปลี่ยน "ชนิดทรง" ตามระดับ (Shape Morph by Level) ⭐ สำคัญ
 บางวิชา **ทรงเปลี่ยนชนิด** เมื่อถึงระดับที่กำหนด (ไม่ใช่แค่ขยายขนาด) เช่นวิชาเดียวกัน:
@@ -166,8 +165,8 @@ def resolve_shape(caster, skill):
 
 ### 3.2 ขยาย "ขนาดทรงเดิม" ตามระดับ (Size Scaling)
 วิชาที่ไม่เปลี่ยนชนิด แต่พารามิเตอร์โตขึ้น — กำหนดใน `shape.scaling`
-**ตารางตัวอย่าง (เทียบช่วงระดับ / ดาว):**
-| ทรง | พารามิเตอร์โต | Lv1–10 (★1) | Lv30 (★3) | Lv60 (★6) | Lv100 (★10) |
+**ตารางตัวอย่าง (เทียบช่วงระดับ Lv):**
+| ทรง | พารามิเตอร์โต | Lv10 | Lv30 | Lv60 | Lv100 |
 |---|---|---|---|---|---|
 | 1 เส้นตรง | length / width | 3 / 1 | 4 / 1 | 5 / 3 | 7 / 3 |
 | 3 กากบาท | length | 2 | 3 | 4 | 6 |
@@ -206,7 +205,7 @@ def rotate(off, orientation):
     "type": "cross",            // line | plus5 | cross | star | pyramid | radial
     "params": { "length": 2, "width": 1, "radius": 0, "rays": 6, "cast_range": 0 },
     "orientation": "front",     // front|right|back|left (เฉพาะทรงมีทิศ)
-    "scaling": { "length": [2,3,4,6] }  // index = ช่วงดาว หรือสูตร string
+    "scaling": { "length": [2,3,4,6] }  // index = ช่วงระดับ หรือสูตร string
   },
   // หรือใช้ shape_stages แทน shape เมื่อทรงเปลี่ยนชนิดตามระดับ (§3.1):
   // "shape_stages": [ {min_level,max_level,type,params,orientation}, ... ],

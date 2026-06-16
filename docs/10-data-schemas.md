@@ -12,11 +12,11 @@
   "name": "กระบี่พื้นฐานเมฆขาว",
   "type": "active",                 // active | passive
   "category": "sword",              // sword|palm|poison|qi|light
-  "grade": "common",                // common(7)|fine(8)|superb(9)|supreme(10)
+  "grade": "common",                // common(70)|fine(80)|superb(90)|supreme(100)
   "element": "blade",
   "base_mult": 1.1,
   "mp_cost": 6,
-  "max_star": 7,
+  "max_level": 70,                  // ระดับสูงสุดตาม grade (สเกล 1–100)
   "targeting": "single",            // single|aoe|self|ally|all_allies
   "shape": { "type": "single" },    // ทรงพื้นที่ AoE → ดูเต็มใน docs/12-skill-shapes.md
   "effects": [
@@ -25,18 +25,18 @@
     { "kind": "lifesteal", "pct": 0.0 },
     { "kind": "mpsteal", "pct": 0.0 }
   ],
-  "star_unlocks": {                  // ผลพิเศษตามดาว (มาตรฐาน docs/02 §2)
-    "4": "effect_chance+0.05",
-    "6": "self_action_spd+0.10",
-    "8": "effect_chance+0.05",
-    "10": "supreme_passive"          // เฉพาะ grade=supreme
+  "level_unlocks": {                 // ผลพิเศษตามระดับ (มาตรฐาน docs/02 §2)
+    "40": "effect_chance+0.05",
+    "60": "self_action_spd+0.10",
+    "80": "effect_chance+0.05",
+    "100": "supreme_passive"         // เฉพาะ grade=supreme
   },
-  "requirements": {                  // ปลดล็อกเรียน — ไม่อิงเลเวล (docs/02 §1)
+  "requirements": {                  // ปลดล็อกเรียน — ไม่อิงเลเวลตัวละคร (docs/02 §1)
     "attributes": { "STR": 8 },
     "comprehension": 8,
     "fame": 1,
     "sect": "cloud_peak",
-    "prereq": []                     // [{ "skill": "...", "star": 5 }]
+    "prereq": []                     // [{ "skill": "...", "level": 50 }]
   }
 }
 ```
@@ -117,9 +117,9 @@
   "combat_exp": 1820,               // สกุลเงินฝึกวิชา (มีเพดานตาม fame)
   "fame_level": 3,
   "karma": 0,
-  "skills": [                       // ดาว + ความชำนาญ (docs/02 §3)
-    { "id": "cloud_sword_basic", "star": 7, "prof": 120 },
-    { "id": "cloud_nine_heavens", "star": 4, "prof": 30 }
+  "skills": [                       // ระดับ (1–100) + ความชำนาญ (docs/02 §3)
+    { "id": "cloud_sword_basic", "level": 70, "prof": 120 },
+    { "id": "cloud_nine_heavens", "level": 40, "prof": 30 }
   ],
   "equipped_active": ["cloud_nine_heavens","..."],   // ≤4
   "equipped_passive": ["cloud_inner_qi","..."],      // ≤2
@@ -150,10 +150,10 @@
 | ไทย | อังกฤษ/โค้ด | หมายเหตุ |
 |---|---|---|
 | ประสบการณ์ต่อสู้จริง | Combat EXP | สกุลเงินฝึกวิชา ไม่ใช่เลเวล |
-| ค่าความเข้าใจ | Comprehension (COM) | เพดานดาวที่ฝึกได้ |
+| ค่าความเข้าใจ | Comprehension (COM) | เพดานระดับวิชาที่ฝึกได้ |
 | ชื่อเสียง | Fame | เพดานสะสม EXP / ปลดวิชา/สิทธิ์ |
 | ดัชนีพลังรวม | Power Index (PI) | ใช้แทนเลเวลทั้งเกม |
-| ระดับดาว | Star Rank | ระดับความแรงของวิชา 0–10 |
+| ระดับวิชา | Skill Level | ระดับความแรงของวิชา 1–100 |
 | ความชำนาญ | Proficiency (prof) | สะสมจากการใช้วิชา ลดต้นทุนฝึก |
 | พลังภายใน/ลมปราณ | Inner Power / MP (内功/MP) | passive=内功, ทรัพยากร=MP |
 | ฝีเท้า | Speed (SPD) | ลำดับออกท่า |

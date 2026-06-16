@@ -193,7 +193,7 @@ def resolve_radial(caster, skill):
     for t in targets:
         if not roll_hit(caster, t):                  # ACC vs EVA
             events.append(dmg_event(t, kind="miss")); continue
-        mult = skill.base_mult + caster.skill_star*0.10
+        mult = skill.base_mult + caster.skill_level*0.01
         if dist(caster.pos,t.pos) > skill.falloff.inner:
             mult *= skill.falloff.outer_mult         # ดาเมจลดตามระยะ
         crit = roll_crit(caster, t)
@@ -250,7 +250,7 @@ DamageEvent = { target_id, amount, kind, world_pos, tick }
 ใช้ของเดิมทั้งหมด ไม่สร้างเลขใหม่ซ้อน:
 - **ค่าสถานะ & สูตรดาเมจ/hit/crit/สถานะ:** docs/01 §3–4 และ §7 (status)
 - **SPD** ขับ Action Gauge, **AGI** ขับความเร็วเดิน (ทั้งคู่จากค่าพื้นฐานเดิม)
-- **วิชา/ดาว/MP/ความชำนาญ:** docs/02 (เพิ่มแค่ field เชิงพื้นที่: shape/radius/max_targets)
+- **วิชา/ระดับ/MP/ความชำนาญ:** docs/02 (เพิ่มแค่ field เชิงพื้นที่: shape/radius/max_targets)
 - **EXP/ชื่อเสียง/PI/drop:** docs/03, 08 ใช้ได้ทันที (โหมดนี้แค่เปลี่ยน "วิธีตี")
 
 ---
