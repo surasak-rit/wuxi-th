@@ -30,7 +30,8 @@ docs/
  ├─ 10-data-schemas.md      Data schema + อภิธานศัพท์ (dev hand-off)
  ├─ 11-combat-grid-atb.md   ระบบต่อสู้หลัก: กริดสี่เหลี่ยม + Real-time ATB + Radial AoE
  ├─ 12-skill-shapes.md      รูปทรงพื้นที่โจมตี 6 แบบ + ขยายตามระดับวิชา
- └─ 13-cultivation-training.md ระบบฝึกปรือวิทยายุทธ (3 ช่องทาง + ทะลวงด่าน)
+ ├─ 13-cultivation-training.md ระบบฝึกปรือวิทยายุทธ (3 ช่องทาง + ทะลวงด่าน)
+ └─ 14-professions.md        ระบบอาชีพ: เก็บเกี่ยว→แปรรูป→ผลิต + เศรษฐกิจ
 ```
 
 ## สถานะ

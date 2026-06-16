@@ -23,6 +23,7 @@
 | 11 | [docs/11-combat-grid-atb.md](docs/11-combat-grid-atb.md) | **ระบบต่อสู้หลัก:** กริดสี่เหลี่ยม (hex ออปชัน) + Real-time ATB + Radial AoE + floating damage |
 | 12 | [docs/12-skill-shapes.md](docs/12-skill-shapes.md) | รูปทรงพื้นที่โจมตี 6 แบบ (เส้น/กากบาท/ดาว/พีระมิด/วงกว้าง) + แผนภาพ + ขยายตามระดับวิชา |
 | 13 | [docs/13-cultivation-training.md](docs/13-cultivation-training.md) | ระบบฝึกปรือวิทยายุทธ: 3 ช่องทาง (กดฝึก/ใช้เวลา/ความชำนาญ), สถานที่ฝึก, ทะลวงด่าน, ฝึกร่วม |
+| 14 | [docs/14-professions.md](docs/14-professions.md) | ระบบอาชีพ/ชีพวิถี: สายโซ่ เก็บเกี่ยว→แปรรูป→ผลิต, ระดับอาชีพ, คุณภาพ, เศรษฐกิจ |
 
 ---
 
