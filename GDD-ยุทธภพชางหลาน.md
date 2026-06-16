@@ -22,6 +22,7 @@
 | 10 | [docs/10-data-schemas.md](docs/10-data-schemas.md) | Data schema (วิชา/ศัตรู/บอส/ไอเทม/เซฟ), stat pipeline, อภิธานศัพท์, open questions |
 | 11 | [docs/11-combat-grid-atb.md](docs/11-combat-grid-atb.md) | **ระบบต่อสู้หลัก:** กริดสี่เหลี่ยม (hex ออปชัน) + Real-time ATB + Radial AoE + floating damage |
 | 12 | [docs/12-skill-shapes.md](docs/12-skill-shapes.md) | รูปทรงพื้นที่โจมตี 6 แบบ (เส้น/กากบาท/ดาว/พีระมิด/วงกว้าง) + แผนภาพ + ขยายตามระดับวิชา |
+| 13 | [docs/13-cultivation-training.md](docs/13-cultivation-training.md) | ระบบฝึกปรือวิทยายุทธ: 3 ช่องทาง (กดฝึก/ใช้เวลา/ความชำนาญ), สถานที่ฝึก, ทะลวงด่าน, ฝึกร่วม |
 
 ---
 
